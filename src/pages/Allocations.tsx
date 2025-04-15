@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -16,12 +15,14 @@ import {
   ArrowLeftRight, 
   BarChart, 
   Brain, 
+  Briefcase,
   Calendar, 
   Check, 
   Clock, 
   Filter, 
   RefreshCw, 
-  Settings, 
+  Settings,
+  Users,
   X 
 } from 'lucide-react';
 import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
@@ -153,7 +154,7 @@ const Allocations: React.FC = () => {
     const updatedConsultants = consultants.map(c => 
       c.id === data.consultantId ? {
         ...c,
-        status: "Allocated",
+        status: "Allocated" as const,
         currentProject: data.projectId
       } : c
     );

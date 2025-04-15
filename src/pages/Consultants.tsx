@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
@@ -25,7 +24,6 @@ const Consultants: React.FC = () => {
   
   const consultant = id ? getConsultantById(id) : undefined;
   
-  // If we have a consultant ID, get their allocations
   const consultantAllocations = id 
     ? getAllocationsForConsultant(id) 
     : [];
@@ -41,16 +39,13 @@ const Consultants: React.FC = () => {
     endDate: string;
     percentage: number;
   }) => {
-    // Create a new allocation
     const newAllocation = {
       id: `A${String(localAllocations.length + 1).padStart(3, '0')}`,
       ...data
     };
     
-    // Update local allocations
     setLocalAllocations([...localAllocations, newAllocation]);
     
-    // Update consultant status to Allocated
     const updatedConsultants = localConsultants.map(c => 
       c.id === data.consultantId ? {
         ...c,
@@ -60,7 +55,6 @@ const Consultants: React.FC = () => {
     );
     setLocalConsultants(updatedConsultants);
     
-    // Update project resources assigned
     const updatedProjects = localProjects.map(p => 
       p.id === data.projectId ? {
         ...p,
@@ -72,7 +66,6 @@ const Consultants: React.FC = () => {
     );
     setLocalProjects(updatedProjects);
     
-    // Show success message
     toast({
       title: "Consultant Allocated",
       description: "The consultant has been successfully allocated to the project.",
@@ -102,15 +95,15 @@ const Consultants: React.FC = () => {
         )}
       </main>
       
-      {/* Move Consultant Modal */}
       {consultant && (
         <MoveConsultantModal
           isOpen={showMoveModal}
           onClose={() => setShowMoveModal(false)}
           onConfirm={handleConfirmMove}
-          consultant={consultant}
-          projects={localProjects}
-          type="fromConsultant"
+          consultants={[consultant]}
+          project={null}
+          type="fromProject"
+          preselectedConsultant={consultant}
         />
       )}
     </div>
