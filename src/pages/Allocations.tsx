@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -9,8 +10,6 @@ import {
 } from '../data/mockData';
 import { Consultant, Allocation, Project, PipelineOpportunity } from '@/lib/types';
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { 
   ArrowLeftRight, 
   BarChart, 
@@ -25,7 +24,11 @@ import {
   Users,
   X 
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
+import AllocationTimeline from '@/components/Allocation/AllocationTimeline';
+import ProjectsNeedingStaffing from '@/components/Allocation/ProjectsNeedingStaffing';
+import SuggestedConsultants from '@/components/Allocation/SuggestedConsultants';
 
 // Helper function to calculate chargeability
 const calculateChargeability = (consultants: Consultant[], allocations: Allocation[]): number => {
@@ -40,7 +43,6 @@ const calculateChargeability = (consultants: Consultant[], allocations: Allocati
 
 const Allocations: React.FC = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'bench' | 'pipeline'>('bench');
   const [consultants, setConsultants] = useState<Consultant[]>(initialConsultants);
   const [allocations, setAllocations] = useState<Allocation[]>(initialAllocations);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
@@ -48,7 +50,9 @@ const Allocations: React.FC = () => {
   const [chargeability, setChargeability] = useState<number>(0);
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState<Consultant | null>(null);
-  const [selectedProject, setSelectedProject] = useState<PipelineOpportunity | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | PipelineOpportunity | null>(null);
+  const [selectedAllocation, setSelectedAllocation] = useState<Allocation | null>(null);
+  const [timeSlot, setTimeSlot] = useState<{ startDate: Date; endDate: Date } | null>(null);
   
   // Calculate metrics
   useEffect(() => {
@@ -61,6 +65,53 @@ const Allocations: React.FC = () => {
   
   // Get pipeline projects needing resources
   const pipelineProjectsNeedingResources = pipelineOpportunities.filter(p => p.resourcesNeeded > 0);
+  
+  // Handle selection of project
+  const handleSelectProject = (project: Project | PipelineOpportunity) => {
+    setSelectedProject(project);
+    setSelectedConsultant(null);
+    setSelectedAllocation(null);
+  };
+  
+  // Handle selection of consultant
+  const handleSelectConsultant = (consultant: Consultant) => {
+    setSelectedConsultant(consultant);
+    // Don't reset selectedProject, we may want to allocate this consultant to it
+  };
+  
+  // Handle selection of allocation
+  const handleSelectAllocation = (allocation: Allocation) => {
+    setSelectedAllocation(allocation);
+    
+    // Find the consultant and project
+    const consultant = consultants.find(c => c.id === allocation.consultantId);
+    if (consultant) {
+      setSelectedConsultant(consultant);
+    }
+    
+    const project = projects.find(p => p.id === allocation.projectId) || 
+                  pipelineOpportunities.find(p => p.id === allocation.projectId);
+    if (project) {
+      setSelectedProject(project);
+    }
+  };
+  
+  // Handle time slot selection
+  const handleSelectTimeSlot = (consultant: Consultant, startDate: Date, endDate: Date) => {
+    setSelectedConsultant(consultant);
+    setTimeSlot({ startDate, endDate });
+    
+    // If we have both a consultant and a project, open the allocation modal
+    if (selectedProject) {
+      setShowMoveModal(true);
+    }
+  };
+  
+  // Handle allocate consultant click
+  const handleAllocateConsultant = (consultant: Consultant) => {
+    setSelectedConsultant(consultant);
+    setShowMoveModal(true);
+  };
   
   // Handle automatic allocation
   const handleAutoAllocate = () => {
@@ -130,12 +181,6 @@ const Allocations: React.FC = () => {
     });
   };
   
-  // Handle opening the move modal
-  const handleMoveConsultant = (consultant: Consultant) => {
-    setSelectedConsultant(consultant);
-    setShowMoveModal(true);
-  };
-  
   // Handle moving a consultant to a project
   const handleConfirmMove = (data: {
     consultantId: string;
@@ -159,27 +204,47 @@ const Allocations: React.FC = () => {
       } : c
     );
     
-    // Update the pipeline opportunity
-    const updatedPipelineOpportunities = pipelineOpportunities.map(p => 
-      p.id === data.projectId ? {
-        ...p,
-        resourcesNeeded: Math.max(0, p.resourcesNeeded - 1)
-      } : p
-    );
+    // Check if the project is in the pipeline opportunities or confirmed projects
+    const isPipelineProject = pipelineOpportunities.some(p => p.id === data.projectId);
+    
+    if (isPipelineProject) {
+      // Update the pipeline opportunity
+      const updatedPipelineOpportunities = pipelineOpportunities.map(p => 
+        p.id === data.projectId ? {
+          ...p,
+          resourcesNeeded: Math.max(0, p.resourcesNeeded - 1)
+        } : p
+      );
+      setPipelineOpportunities(updatedPipelineOpportunities);
+    } else {
+      // Update the confirmed project
+      const updatedProjects = projects.map(p => 
+        p.id === data.projectId ? {
+          ...p,
+          resourcesAssigned: p.resourcesAssigned + 1,
+          staffingStatus: p.resourcesAssigned + 1 >= p.resourcesNeeded 
+            ? 'Fully Staffed' as const 
+            : 'Needs Resources' as const
+        } : p
+      );
+      setProjects(updatedProjects);
+    }
     
     // Update state
     setConsultants(updatedConsultants);
     setAllocations([...allocations, newAllocation]);
-    setPipelineOpportunities(updatedPipelineOpportunities);
+    
+    // Reset selected states and close modal
+    setSelectedProject(null);
+    setSelectedConsultant(null);
+    setTimeSlot(null);
+    setShowMoveModal(false);
     
     // Notify user
     toast({
       title: "Allocation Complete",
       description: "The consultant has been successfully allocated to the project.",
     });
-    
-    // Close the modal
-    setShowMoveModal(false);
   };
   
   return (
@@ -222,156 +287,70 @@ const Allocations: React.FC = () => {
         </div>
         
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Allocations</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Resource Allocation</h1>
           <Button 
             onClick={handleAutoAllocate}
-            className="flex items-center space-x-2 bg-primary2 hover:bg-primary2/90"
+            className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
           >
             <Brain className="h-4 w-4" />
             <span>Auto Allocate</span>
           </Button>
         </div>
         
-        <Tabs defaultValue="bench" className="w-full" onValueChange={(value) => setActiveTab(value as 'bench' | 'pipeline')}>
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="bench">Consultants on Bench</TabsTrigger>
-            <TabsTrigger value="pipeline">Pipeline Opportunities</TabsTrigger>
-          </TabsList>
+        {/* Master Allocation Timeline */}
+        <div className="mb-6">
+          <AllocationTimeline
+            consultants={consultants}
+            allocations={allocations}
+            projects={projects}
+            pipelineOpportunities={pipelineOpportunities}
+            onSelectAllocation={handleSelectAllocation}
+            onSelectConsultant={handleSelectConsultant}
+            onSelectTimeSlot={handleSelectTimeSlot}
+          />
+        </div>
+        
+        {/* Two-column layout for project needs and suggested consultants */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <ProjectsNeedingStaffing
+              projects={projects}
+              pipelineOpportunities={pipelineOpportunities}
+              onSelectProject={handleSelectProject}
+              selectedProjectId={selectedProject?.id || null}
+            />
+          </div>
           
-          <TabsContent value="bench" className="mt-0">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              {benchedConsultants.length === 0 ? (
-                <div className="p-8 text-center">
-                  <p className="text-gray-500">No consultants currently on bench.</p>
-                </div>
-              ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Role
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Service Line
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Expertise
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {benchedConsultants.map((consultant) => (
-                      <tr key={consultant.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{consultant.name}</div>
-                          <div className="text-sm text-gray-500">{consultant.id}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {consultant.role}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {consultant.serviceLine}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {consultant.expertise}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleMoveConsultant(consultant)}
-                            className="flex items-center space-x-1"
-                          >
-                            <ArrowLeftRight className="h-3 w-3" />
-                            <span>Allocate</span>
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="pipeline" className="mt-0">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              {pipelineProjectsNeedingResources.length === 0 ? (
-                <div className="p-8 text-center">
-                  <p className="text-gray-500">No pipeline projects currently needing resources.</p>
-                </div>
-              ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Project
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Client
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Timeline
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Resources Needed
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {pipelineProjectsNeedingResources.map((project) => (
-                      <tr key={project.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                          <div className="text-sm text-gray-500">{project.id}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {project.clientName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            {project.status} ({project.winPercentage}%)
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 mr-1" />
-                            {new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                          {project.resourcesNeeded}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+          <div>
+            <SuggestedConsultants
+              consultants={consultants}
+              selectedProject={selectedProject}
+              onSelectConsultant={handleSelectConsultant}
+              onAllocateConsultant={handleAllocateConsultant}
+              selectedConsultantId={selectedConsultant?.id || null}
+            />
+          </div>
+        </div>
       </main>
       
       {/* Move Consultant Modal */}
       {selectedConsultant && (
         <MoveConsultantModal
           isOpen={showMoveModal}
-          onClose={() => setShowMoveModal(false)}
+          onClose={() => {
+            setShowMoveModal(false);
+            setTimeSlot(null);
+          }}
           onConfirm={handleConfirmMove}
-          consultants={consultants}
-          project={null}
-          type="toPipeline"
-          pipelineOpportunities={pipelineOpportunities}
+          consultants={[selectedConsultant]}
+          project={selectedProject || null}
+          type={selectedProject ? "fromProject" : "toPipeline"}
+          pipelineOpportunities={selectedProject ? undefined : pipelineOpportunities}
           preselectedConsultant={selectedConsultant}
+          initialDates={timeSlot ? {
+            startDate: timeSlot.startDate.toISOString().split('T')[0],
+            endDate: timeSlot.endDate.toISOString().split('T')[0]
+          } : undefined}
         />
       )}
     </div>

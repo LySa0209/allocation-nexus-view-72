@@ -65,3 +65,10 @@ export interface DashboardMetrics {
   pipelineProjects: number;
   projectsNeedingResources: number;
 }
+
+// Move Modal Types
+export interface MoveModalInitialDates {
+  startDate: string;
+  endDate: string;
+}
+
