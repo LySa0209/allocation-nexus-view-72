@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
@@ -6,6 +7,15 @@ import ProjectDetail from '../components/Projects/ProjectDetail';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
 import EditProjectDialog from '../components/Projects/EditProjectDialog';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  consultants, 
+  allocations, 
+  projects, 
+  pipelineOpportunities,
+  getProjectById,
+  getConsultantsForProject
+} from '../data/mockData';
+import { Project } from '@/lib/types';
 
 const Projects: React.FC = () => {
   const { id } = useParams<{ id: string }>();
