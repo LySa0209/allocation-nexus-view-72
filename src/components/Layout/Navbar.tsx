@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Users, Briefcase, List } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -54,6 +54,18 @@ const Navbar: React.FC = () => {
                 <Briefcase className="mr-1 h-5 w-5" />
                 Projects
               </Link>
+              
+              <Link
+                to="/allocations"
+                className={`${
+                  isActive('/allocations')
+                    ? 'border-primary2 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                <List className="mr-1 h-5 w-5" />
+                Allocations
+              </Link>
             </div>
           </div>
         </div>
@@ -89,6 +101,16 @@ const Navbar: React.FC = () => {
         >
           <Briefcase className="h-6 w-6" />
           <span>Projects</span>
+        </Link>
+        
+        <Link
+          to="/allocations"
+          className={`${
+            isActive('/allocations') ? 'text-primary2' : 'text-gray-500'
+          } group flex flex-col items-center px-4 py-2 text-xs font-medium`}
+        >
+          <List className="h-6 w-6" />
+          <span>Allocations</span>
         </Link>
       </div>
     </nav>
