@@ -1,18 +1,10 @@
-
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
 import ProjectList from '../components/Projects/ProjectList';
 import ProjectDetail from '../components/Projects/ProjectDetail';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
-import { 
-  projects, 
-  pipelineOpportunities, 
-  getProjectById, 
-  getConsultantsForProject,
-  consultants,
-  allocations
-} from '../data/mockData';
+import EditProjectDialog from '../components/Projects/EditProjectDialog';
 import { useToast } from '@/hooks/use-toast';
 
 const Projects: React.FC = () => {
@@ -23,12 +15,12 @@ const Projects: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'active' | 'pipeline'>(type || 'active');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [localConsultants, setLocalConsultants] = useState(consultants);
   const [localAllocations, setLocalAllocations] = useState(allocations);
   const [localProjects, setLocalProjects] = useState(projects);
   const [localPipelineOpportunities, setLocalPipelineOpportunities] = useState(pipelineOpportunities);
   
-  // Get the current project or pipeline opportunity
   const currentProject = type === 'active' && id 
     ? getProjectById(id) 
     : undefined;
@@ -39,7 +31,6 @@ const Projects: React.FC = () => {
   
   const currentItem = currentProject || currentOpportunity;
   
-  // If we're looking at a project, get its assigned consultants
   const assignedConsultants = currentProject 
     ? getConsultantsForProject(currentProject.id)
     : [];
@@ -57,16 +48,13 @@ const Projects: React.FC = () => {
     endDate: string;
     percentage: number;
   }) => {
-    // Create a new allocation
     const newAllocation = {
       id: `A${String(localAllocations.length + 1).padStart(3, '0')}`,
       ...data
     };
     
-    // Update local allocations
     setLocalAllocations([...localAllocations, newAllocation]);
     
-    // Update consultant status to Allocated
     const updatedConsultants = localConsultants.map(c => 
       c.id === data.consultantId ? {
         ...c,
@@ -76,7 +64,6 @@ const Projects: React.FC = () => {
     );
     setLocalConsultants(updatedConsultants);
     
-    // Update project resources assigned
     const updatedProjects = localProjects.map(p => 
       p.id === data.projectId ? {
         ...p,
@@ -88,10 +75,21 @@ const Projects: React.FC = () => {
     );
     setLocalProjects(updatedProjects);
     
-    // Show success message
     toast({
       title: "Consultant Added",
       description: "The consultant has been successfully added to the project.",
+    });
+  };
+  
+  const handleEditProject = (updatedProject: Project) => {
+    const updatedProjects = localProjects.map(p => 
+      p.id === updatedProject.id ? updatedProject : p
+    );
+    setLocalProjects(updatedProjects);
+    
+    toast({
+      title: "Project Updated",
+      description: "The project details have been successfully updated.",
     });
   };
   
@@ -106,6 +104,7 @@ const Projects: React.FC = () => {
             type={type} 
             assignedConsultants={assignedConsultants}
             onAddConsultant={handleAddConsultant}
+            onEditProject={() => setShowEditModal(true)}
           />
         ) : (
           <>
@@ -123,16 +122,23 @@ const Projects: React.FC = () => {
         )}
       </main>
       
-      {/* Add Consultant Modal */}
       {currentProject && (
-        <MoveConsultantModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          onConfirm={handleConfirmAdd}
-          project={currentProject}
-          consultants={localConsultants}
-          type="fromProject"
-        />
+        <>
+          <MoveConsultantModal
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+            onConfirm={handleConfirmAdd}
+            project={currentProject}
+            consultants={localConsultants}
+            type="fromProject"
+          />
+          <EditProjectDialog
+            project={currentProject}
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onSave={handleEditProject}
+          />
+        </>
       )}
     </div>
   );

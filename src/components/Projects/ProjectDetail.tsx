@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, DollarSign, Building, Briefcase, 
-  Users, ArrowLeft, Clock 
+  Users, ArrowLeft, Clock, Edit
 } from 'lucide-react';
 import { 
   Project, PipelineOpportunity, Consultant 
@@ -15,13 +14,15 @@ interface ProjectDetailProps {
   type: 'active' | 'pipeline';
   assignedConsultants?: Consultant[];
   onAddConsultant: () => void;
+  onEditProject?: () => void;
 }
 
 const ProjectDetail: React.FC<ProjectDetailProps> = ({ 
   item, 
   type,
   assignedConsultants = [],
-  onAddConsultant
+  onAddConsultant,
+  onEditProject
 }) => {
   const navigate = useNavigate();
   const project = type === 'active' ? item as Project : null;
@@ -42,15 +43,27 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
             {type === 'active' ? 'Project Details' : 'Pipeline Opportunity'}
           </h3>
         </div>
-        {type === 'active' && (
-          <Button 
-            onClick={onAddConsultant}
-            className="bg-primary hover:bg-primary/90 text-white"
-            disabled={project?.staffingStatus === 'Fully Staffed'}
-          >
-            Add Consultant
-          </Button>
-        )}
+        <div className="flex space-x-2">
+          {type === 'active' && onEditProject && (
+            <Button 
+              onClick={onEditProject}
+              variant="outline"
+              className="flex items-center space-x-1"
+            >
+              <Edit className="h-4 w-4" />
+              <span>Edit</span>
+            </Button>
+          )}
+          {type === 'active' && (
+            <Button 
+              onClick={onAddConsultant}
+              className="bg-primary hover:bg-primary/90 text-white"
+              disabled={project?.staffingStatus === 'Fully Staffed'}
+            >
+              Add Consultant
+            </Button>
+          )}
+        </div>
       </div>
       
       {/* Project/Opportunity information */}
@@ -189,13 +202,16 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
             <div className="overflow-hidden">
               <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
                 {assignedConsultants.map((consultant) => (
-                  <li key={consultant.id} className="px-4 py-4 flex justify-between items-center">
+                  <li key={consultant.id} className="px-4 py-4 flex items-center justify-between hover:bg-gray-50">
                     <div>
                       <p className="text-sm font-medium text-primary">{consultant.name}</p>
                       <p className="text-xs text-gray-500">{consultant.role}</p>
                     </div>
-                    <div>
+                    <div className="flex flex-col items-end">
                       <span className="text-xs text-gray-500">{consultant.expertise}</span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        {consultant.serviceLine}
+                      </span>
                     </div>
                   </li>
                 ))}
