@@ -1,4 +1,3 @@
-
 // Consultant/Employee Types
 export interface Consultant {
   id: string;
@@ -45,6 +44,14 @@ export interface PipelineOpportunity {
   estimatedValue?: number;
 }
 
+// Combined type for projects and opportunities
+export type ProjectOrPipeline = Project | PipelineOpportunity;
+
+// Helper type guard
+export function isProject(item: ProjectOrPipeline): item is Project {
+  return 'staffingStatus' in item;
+}
+
 // Allocation Types
 export interface Allocation {
   id: string;
@@ -71,4 +78,3 @@ export interface MoveModalInitialDates {
   startDate: string;
   endDate: string;
 }
-

@@ -1,130 +1,59 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ProjectCard } from '@/components/Allocation/ProjectCard';
+import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
+import { Brain, BarChart, Users, Briefcase } from 'lucide-react';
 import { 
-  consultants as initialConsultants, 
+  consultants as initialConsultants,
   allocations as initialAllocations,
-  projects as initialProjects, 
+  projects as initialProjects,
   pipelineOpportunities as initialPipeline
 } from '../data/mockData';
-import { Consultant, Allocation, Project, PipelineOpportunity } from '@/lib/types';
-import { Progress } from "@/components/ui/progress";
-import { 
-  ArrowLeftRight, 
-  BarChart, 
-  Brain, 
-  Briefcase,
-  Calendar, 
-  Check, 
-  Clock, 
-  Filter, 
-  RefreshCw, 
-  Settings,
-  Users,
-  X 
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
-import AllocationTimeline from '@/components/Allocation/AllocationTimeline';
-import ProjectsNeedingStaffing from '@/components/Allocation/ProjectsNeedingStaffing';
-import SuggestedConsultants from '@/components/Allocation/SuggestedConsultants';
+import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity } from '@/lib/types';
 
-// Helper function to calculate chargeability
-const calculateChargeability = (consultants: Consultant[], allocations: Allocation[]): number => {
+const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
-  
-  // Count allocated consultants
   const allocatedCount = consultants.filter(c => c.status === "Allocated").length;
-  
-  // Calculate percentage
   return Math.round((allocatedCount / consultants.length) * 100);
 };
 
 const Allocations: React.FC = () => {
   const { toast } = useToast();
   const [consultants, setConsultants] = useState<Consultant[]>(initialConsultants);
-  const [allocations, setAllocations] = useState<Allocation[]>(initialAllocations);
+  const [allocations, setAllocations] = useState(initialAllocations);
   const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [pipelineOpportunities, setPipelineOpportunities] = useState<PipelineOpportunity[]>(initialPipeline);
-  const [chargeability, setChargeability] = useState<number>(0);
-  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [pipelineOpportunities] = useState<PipelineOpportunity[]>(initialPipeline);
+  const [selectedProject, setSelectedProject] = useState<ProjectOrPipeline | null>(null);
   const [selectedConsultant, setSelectedConsultant] = useState<Consultant | null>(null);
-  const [selectedProject, setSelectedProject] = useState<Project | PipelineOpportunity | null>(null);
-  const [selectedAllocation, setSelectedAllocation] = useState<Allocation | null>(null);
-  const [timeSlot, setTimeSlot] = useState<{ startDate: Date; endDate: Date } | null>(null);
-  
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [chargeability, setChargeability] = useState<number>(0);
+  const [experienceFilter, setExperienceFilter] = useState<'junior' | 'average' | 'senior'>('average');
+
   // Calculate metrics
   useEffect(() => {
-    const newChargeability = calculateChargeability(consultants, allocations);
+    const newChargeability = calculateChargeability(consultants);
     setChargeability(newChargeability);
-  }, [consultants, allocations]);
-  
-  // Filter consultants on bench
+  }, [consultants]);
+
   const benchedConsultants = consultants.filter(c => c.status === "Benched");
-  
-  // Get pipeline projects needing resources
-  const pipelineProjectsNeedingResources = pipelineOpportunities.filter(p => p.resourcesNeeded > 0);
-  
-  // Handle selection of project
-  const handleSelectProject = (project: Project | PipelineOpportunity) => {
-    setSelectedProject(project);
-    setSelectedConsultant(null);
-    setSelectedAllocation(null);
-  };
-  
-  // Handle selection of consultant
-  const handleSelectConsultant = (consultant: Consultant) => {
-    setSelectedConsultant(consultant);
-    // Don't reset selectedProject, we may want to allocate this consultant to it
-  };
-  
-  // Handle selection of allocation
-  const handleSelectAllocation = (allocation: Allocation) => {
-    setSelectedAllocation(allocation);
-    
-    // Find the consultant and project
-    const consultant = consultants.find(c => c.id === allocation.consultantId);
-    if (consultant) {
-      setSelectedConsultant(consultant);
-    }
-    
-    const project = projects.find(p => p.id === allocation.projectId) || 
-                  pipelineOpportunities.find(p => p.id === allocation.projectId);
-    if (project) {
-      setSelectedProject(project);
-    }
-  };
-  
-  // Handle time slot selection
-  const handleSelectTimeSlot = (consultant: Consultant, startDate: Date, endDate: Date) => {
-    setSelectedConsultant(consultant);
-    setTimeSlot({ startDate, endDate });
-    
-    // If we have both a consultant and a project, open the allocation modal
-    if (selectedProject) {
-      setShowMoveModal(true);
-    }
-  };
-  
-  // Handle allocate consultant click
-  const handleAllocateConsultant = (consultant: Consultant) => {
-    setSelectedConsultant(consultant);
-    setShowMoveModal(true);
-  };
-  
-  // Handle automatic allocation
+  const projectsNeedingResources = [
+    ...projects.filter(p => p.staffingStatus === "Needs Resources"),
+    ...pipelineOpportunities.filter(p => p.resourcesNeeded > 0)
+  ];
+
   const handleAutoAllocate = () => {
-    // Simple allocation algorithm: match benched consultants to pipeline projects
-    if (benchedConsultants.length === 0 || pipelineProjectsNeedingResources.length === 0) {
+    if (benchedConsultants.length === 0 || projectsNeedingResources.length === 0) {
       toast({
         title: "Auto-allocation Failed",
-        description: "No consultants on bench or no pipeline projects needing resources.",
+        description: "No consultants on bench or no projects needing resources.",
         variant: "destructive",
       });
       return;
     }
-    
+
     let allocationsCreated = 0;
     const updatedConsultants = [...consultants];
     const updatedAllocations = [...allocations];
@@ -132,11 +61,11 @@ const Allocations: React.FC = () => {
     
     // Try to allocate each benched consultant to a pipeline project
     benchedConsultants.forEach((consultant, index) => {
-      if (index < pipelineProjectsNeedingResources.length) {
-        const targetProject = pipelineProjectsNeedingResources[index];
+      if (index < projectsNeedingResources.length) {
+        const targetProject = projectsNeedingResources[index];
         
         // Create a new allocation
-        const newAllocation: Allocation = {
+        const newAllocation = {
           id: `A${String(updatedAllocations.length + 1).padStart(3, '0')}`,
           consultantId: consultant.id,
           projectId: targetProject.id,
@@ -172,7 +101,7 @@ const Allocations: React.FC = () => {
     // Update state
     setConsultants(updatedConsultants);
     setAllocations(updatedAllocations);
-    setPipelineOpportunities(updatedPipelineOpportunities);
+    // setPipelineOpportunities(updatedPipelineOpportunities);
     
     // Notify user
     toast({
@@ -180,73 +109,12 @@ const Allocations: React.FC = () => {
       description: `Successfully allocated ${allocationsCreated} consultants to pipeline projects.`,
     });
   };
-  
-  // Handle moving a consultant to a project
-  const handleConfirmMove = (data: {
-    consultantId: string;
-    projectId: string;
-    startDate: string;
-    endDate: string;
-    percentage: number;
-  }) => {
-    // Create a new allocation
-    const newAllocation: Allocation = {
-      id: `A${String(allocations.length + 1).padStart(3, '0')}`,
-      ...data
-    };
-    
-    // Update the consultant status
-    const updatedConsultants = consultants.map(c => 
-      c.id === data.consultantId ? {
-        ...c,
-        status: "Allocated" as const,
-        currentProject: data.projectId
-      } : c
-    );
-    
-    // Check if the project is in the pipeline opportunities or confirmed projects
-    const isPipelineProject = pipelineOpportunities.some(p => p.id === data.projectId);
-    
-    if (isPipelineProject) {
-      // Update the pipeline opportunity
-      const updatedPipelineOpportunities = pipelineOpportunities.map(p => 
-        p.id === data.projectId ? {
-          ...p,
-          resourcesNeeded: Math.max(0, p.resourcesNeeded - 1)
-        } : p
-      );
-      setPipelineOpportunities(updatedPipelineOpportunities);
-    } else {
-      // Update the confirmed project
-      const updatedProjects = projects.map(p => 
-        p.id === data.projectId ? {
-          ...p,
-          resourcesAssigned: p.resourcesAssigned + 1,
-          staffingStatus: p.resourcesAssigned + 1 >= p.resourcesNeeded 
-            ? 'Fully Staffed' as const 
-            : 'Needs Resources' as const
-        } : p
-      );
-      setProjects(updatedProjects);
-    }
-    
-    // Update state
-    setConsultants(updatedConsultants);
-    setAllocations([...allocations, newAllocation]);
-    
-    // Reset selected states and close modal
-    setSelectedProject(null);
-    setSelectedConsultant(null);
-    setTimeSlot(null);
-    setShowMoveModal(false);
-    
-    // Notify user
-    toast({
-      title: "Allocation Complete",
-      description: "The consultant has been successfully allocated to the project.",
-    });
+
+  const handleAllocateConsultant = (consultant: Consultant) => {
+    setSelectedConsultant(consultant);
+    setShowMoveModal(true);
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -278,14 +146,14 @@ const Allocations: React.FC = () => {
             
             <div className="flex flex-col">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-700">Pipeline Projects</h3>
+                <h3 className="text-sm font-medium text-gray-700">Projects Needing Resources</h3>
                 <Briefcase className="h-4 w-4 text-gray-500" />
               </div>
-              <span className="text-xl font-bold">{pipelineProjectsNeedingResources.length}</span>
+              <span className="text-xl font-bold">{projectsNeedingResources.length}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-gray-900">Resource Allocation</h1>
           <Button 
@@ -296,61 +164,129 @@ const Allocations: React.FC = () => {
             <span>Auto Allocate</span>
           </Button>
         </div>
-        
-        {/* Master Allocation Timeline */}
-        <div className="mb-6">
-          <AllocationTimeline
-            consultants={consultants}
-            allocations={allocations}
-            projects={projects}
-            pipelineOpportunities={pipelineOpportunities}
-            onSelectAllocation={handleSelectAllocation}
-            onSelectConsultant={handleSelectConsultant}
-            onSelectTimeSlot={handleSelectTimeSlot}
-          />
-        </div>
-        
-        {/* Two-column layout for project needs and suggested consultants */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <ProjectsNeedingStaffing
-              projects={projects}
-              pipelineOpportunities={pipelineOpportunities}
-              onSelectProject={handleSelectProject}
-              selectedProjectId={selectedProject?.id || null}
-            />
+
+        {/* Projects Needing Resources */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-4">Projects Needing Resources</h2>
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {projectsNeedingResources.map(project => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                isSelected={selectedProject?.id === project.id}
+                onClick={() => setSelectedProject(project)}
+              />
+            ))}
           </div>
-          
-          <div>
-            <SuggestedConsultants
-              consultants={consultants}
-              selectedProject={selectedProject}
-              onSelectConsultant={handleSelectConsultant}
-              onAllocateConsultant={handleAllocateConsultant}
-              selectedConsultantId={selectedConsultant?.id || null}
-            />
+        </div>
+
+        {/* Experience Level Filter */}
+        <div className="flex gap-2 mb-4">
+          {(['junior', 'average', 'senior'] as const).map((level) => (
+            <Button
+              key={level}
+              variant={experienceFilter === level ? 'default' : 'outline'}
+              onClick={() => setExperienceFilter(level)}
+              className="capitalize"
+            >
+              {level} Experience
+            </Button>
+          ))}
+        </div>
+
+        {/* Available Consultants */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Available Consultants</h2>
+            <div className="space-y-4">
+              {benchedConsultants.map(consultant => (
+                <div
+                  key={consultant.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                >
+                  <div>
+                    <h3 className="font-medium">{consultant.name}</h3>
+                    <p className="text-sm text-gray-500">{consultant.role}</p>
+                  </div>
+                  <Button
+                    onClick={() => handleAllocateConsultant(consultant)}
+                    variant="outline"
+                  >
+                    Allocate
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Project Details */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Project Details</h2>
+            {selectedProject ? (
+              <div className="space-y-4">
+                <h3 className="font-medium">{selectedProject.name}</h3>
+                <p className="text-gray-600">{selectedProject.clientName}</p>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">
+                    {new Date(selectedProject.startDate).toLocaleDateString()} - 
+                    {new Date(selectedProject.endDate).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500">Select a project to view details</p>
+            )}
           </div>
         </div>
       </main>
-      
+
       {/* Move Consultant Modal */}
       {selectedConsultant && (
         <MoveConsultantModal
           isOpen={showMoveModal}
           onClose={() => {
             setShowMoveModal(false);
-            setTimeSlot(null);
           }}
-          onConfirm={handleConfirmMove}
+          onConfirm={(data) => {
+            const newAllocation = {
+              id: `A${String(allocations.length + 1).padStart(3, '0')}`,
+              ...data
+            };
+            
+            setAllocations([...allocations, newAllocation]);
+            
+            const updatedConsultants = consultants.map(c => 
+              c.id === data.consultantId ? {
+                ...c,
+                status: 'Allocated' as const,
+                currentProject: data.projectId
+              } : c
+            );
+            setConsultants(updatedConsultants);
+            
+            // Update the confirmed project
+            const updatedProjects = projects.map(p => 
+              p.id === data.projectId ? {
+                ...p,
+                resourcesAssigned: p.resourcesAssigned + 1,
+                staffingStatus: p.resourcesAssigned + 1 >= p.resourcesNeeded 
+                  ? 'Fully Staffed' as const 
+                  : 'Needs Resources' as const
+              } : p
+            );
+            setProjects(updatedProjects);
+            
+            toast({
+              title: "Consultant Added",
+              description: "The consultant has been successfully added to the project.",
+            });
+            setShowMoveModal(false);
+          }}
           consultants={[selectedConsultant]}
-          project={selectedProject || null}
-          type={selectedProject ? "fromProject" : "toPipeline"}
-          pipelineOpportunities={selectedProject ? undefined : pipelineOpportunities}
+          project={selectedProject}
+          type="fromProject"
           preselectedConsultant={selectedConsultant}
-          initialDates={timeSlot ? {
-            startDate: timeSlot.startDate.toISOString().split('T')[0],
-            endDate: timeSlot.endDate.toISOString().split('T')[0]
-          } : undefined}
         />
       )}
     </div>
