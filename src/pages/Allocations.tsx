@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -5,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ProjectCard } from '@/components/Allocation/ProjectCard';
 import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
-import { Brain, BarChart, Users, Briefcase } from 'lucide-react';
+import { Brain, BarChart, Users, Briefcase, Calendar } from 'lucide-react';
 import { 
   consultants as initialConsultants,
   allocations as initialAllocations,
   projects as initialProjects,
   pipelineOpportunities as initialPipeline
 } from '../data/mockData';
-import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity } from '@/lib/types';
+import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
 
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
@@ -265,17 +266,19 @@ const Allocations: React.FC = () => {
             );
             setConsultants(updatedConsultants);
             
-            // Update the confirmed project
-            const updatedProjects = projects.map(p => 
-              p.id === data.projectId ? {
-                ...p,
-                resourcesAssigned: p.resourcesAssigned + 1,
-                staffingStatus: p.resourcesAssigned + 1 >= p.resourcesNeeded 
-                  ? 'Fully Staffed' as const 
-                  : 'Needs Resources' as const
-              } : p
-            );
-            setProjects(updatedProjects);
+            // Update the confirmed project if it's a project (not a pipeline)
+            if (selectedProject && isProject(selectedProject)) {
+              const updatedProjects = projects.map(p => 
+                p.id === data.projectId ? {
+                  ...p,
+                  resourcesAssigned: p.resourcesAssigned + 1,
+                  staffingStatus: p.resourcesAssigned + 1 >= p.resourcesNeeded 
+                    ? 'Fully Staffed' as const 
+                    : 'Needs Resources' as const
+                } : p
+              );
+              setProjects(updatedProjects);
+            }
             
             toast({
               title: "Consultant Added",

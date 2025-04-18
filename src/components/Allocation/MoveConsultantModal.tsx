@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
-import { Consultant, Project, PipelineOpportunity } from '@/lib/types';
+import { Consultant, Project, PipelineOpportunity, ProjectOrPipeline, isProject } from '@/lib/types';
 
 interface MoveConsultantModalProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ interface MoveConsultantModalProps {
     percentage: number;
   }) => void;
   consultants: Consultant[];
-  project: Project | null;
+  project: ProjectOrPipeline | null;
   type: 'fromProject' | 'toPipeline';
   pipelineOpportunities?: PipelineOpportunity[];
   preselectedConsultant?: Consultant;
