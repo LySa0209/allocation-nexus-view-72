@@ -116,6 +116,23 @@ const Allocations: React.FC = () => {
     setShowMoveModal(true);
   };
 
+  // New function to get allocated consultants for a project
+  const getAllocatedConsultants = (projectId: string): Consultant[] => {
+    const projectAllocations = allocations.filter(a => a.projectId === projectId);
+    return consultants.filter(c => 
+      projectAllocations.some(a => a.consultantId === c.id)
+    );
+  };
+
+  // Function to check if consultant is selected for current project
+  const isConsultantSelected = (consultant: Consultant): boolean => {
+    if (!selectedProject) return false;
+    return allocations.some(a => 
+      a.consultantId === consultant.id && 
+      a.projectId === selectedProject.id
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -166,18 +183,61 @@ const Allocations: React.FC = () => {
           </Button>
         </div>
 
-        {/* Projects Needing Resources */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-4">Projects Needing Resources</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {projectsNeedingResources.map(project => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                isSelected={selectedProject?.id === project.id}
-                onClick={() => setSelectedProject(project)}
-              />
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Projects Needing Resources - Now Vertical */}
+          <div className="bg-white rounded-lg shadow p-6 max-h-[600px] overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-4">Projects Needing Resources</h2>
+            <div className="space-y-4">
+              {projectsNeedingResources.map(project => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  isSelected={selectedProject?.id === project.id}
+                  onClick={() => setSelectedProject(project)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Project Details - Now showing allocated consultants */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">
+              {selectedProject ? `Consultants on ${selectedProject.name}` : 'Select a Project'}
+            </h2>
+            {selectedProject ? (
+              <div className="space-y-4">
+                {getAllocatedConsultants(selectedProject.id).length > 0 ? (
+                  getAllocatedConsultants(selectedProject.id).map(consultant => (
+                    <div
+                      key={consultant.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div>
+                        <h3 className="font-medium">{consultant.name}</h3>
+                        <p className="text-sm text-gray-500">{consultant.role}</p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          // Handle removing consultant - you might want to implement this
+                          toast({
+                            title: "Not Implemented",
+                            description: "Remove consultant functionality coming soon.",
+                          });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No consultants allocated to this project yet.</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-500">Select a project to view allocated consultants</p>
+            )}
           </div>
         </div>
 
@@ -196,48 +256,26 @@ const Allocations: React.FC = () => {
         </div>
 
         {/* Available Consultants */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Available Consultants</h2>
-            <div className="space-y-4">
-              {benchedConsultants.map(consultant => (
-                <div
-                  key={consultant.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+        <div className="mt-6 bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Available Consultants</h2>
+          <div className="space-y-4">
+            {benchedConsultants.map(consultant => (
+              <div
+                key={consultant.id}
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+              >
+                <div>
+                  <h3 className="font-medium">{consultant.name}</h3>
+                  <p className="text-sm text-gray-500">{consultant.role}</p>
+                </div>
+                <Button
+                  onClick={() => handleAllocateConsultant(consultant)}
+                  variant={isConsultantSelected(consultant) ? "destructive" : "outline"}
                 >
-                  <div>
-                    <h3 className="font-medium">{consultant.name}</h3>
-                    <p className="text-sm text-gray-500">{consultant.role}</p>
-                  </div>
-                  <Button
-                    onClick={() => handleAllocateConsultant(consultant)}
-                    variant="outline"
-                  >
-                    Allocate
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Project Details */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">Project Details</h2>
-            {selectedProject ? (
-              <div className="space-y-4">
-                <h3 className="font-medium">{selectedProject.name}</h3>
-                <p className="text-gray-600">{selectedProject.clientName}</p>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm">
-                    {new Date(selectedProject.startDate).toLocaleDateString()} - 
-                    {new Date(selectedProject.endDate).toLocaleDateString()}
-                  </span>
-                </div>
+                  {isConsultantSelected(consultant) ? 'Remove' : 'Allocate'}
+                </Button>
               </div>
-            ) : (
-              <p className="text-gray-500">Select a project to view details</p>
-            )}
+            ))}
           </div>
         </div>
       </main>
