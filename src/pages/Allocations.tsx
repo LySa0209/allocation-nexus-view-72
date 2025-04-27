@@ -4,9 +4,11 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import { ProjectCard } from '@/components/Allocation/ProjectCard';
 import MoveConsultantModal from '@/components/Allocation/MoveConsultantModal';
-import { Brain, BarChart, Users, Briefcase, Calendar } from 'lucide-react';
+import { Brain, BarChart, Users, Briefcase } from 'lucide-react';
 import { 
   consultants as initialConsultants,
   allocations as initialAllocations,
@@ -32,6 +34,8 @@ const Allocations: React.FC = () => {
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [chargeability, setChargeability] = useState<number>(0);
   const [experienceFilter, setExperienceFilter] = useState<'junior' | 'average' | 'senior'>('average');
+  const [fteSlider, setFteSlider] = useState(3);
+  const [seniorityMix, setSeniorityMix] = useState(60);
 
   // Calculate metrics
   useEffect(() => {
@@ -116,7 +120,7 @@ const Allocations: React.FC = () => {
     setShowMoveModal(true);
   };
 
-  // New function to get allocated consultants for a project
+  // Get allocated consultants for a project
   const getAllocatedConsultants = (projectId: string): Consultant[] => {
     const projectAllocations = allocations.filter(a => a.projectId === projectId);
     return consultants.filter(c => 
@@ -124,7 +128,7 @@ const Allocations: React.FC = () => {
     );
   };
 
-  // Function to check if consultant is selected for current project
+  // Check if consultant is selected for current project
   const isConsultantSelected = (consultant: Consultant): boolean => {
     if (!selectedProject) return false;
     return allocations.some(a => 
@@ -137,56 +141,46 @@ const Allocations: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        {/* Metrics Bar */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex flex-col">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-700">Chargeability</h3>
-                <BarChart className="h-4 w-4 text-gray-500" />
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-full">
-                  <Progress value={chargeability} />
-                </div>
-                <span className="text-sm font-medium">{chargeability}%</span>
-              </div>
+      <main className="container mx-auto px-4">
+        {/* KPI Bar */}
+        <div className="bg-white rounded-lg shadow p-4 mb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold text-lg">Resource Allocation Dashboard</h3>
+              <p className="text-sm text-gray-500">Last updated: Just now</p>
             </div>
-            
-            <div className="flex flex-col">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-700">Consultants on Bench</h3>
-                <Users className="h-4 w-4 text-gray-500" />
+            <div className="flex space-x-6">
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Total Consultants</p>
+                <p className="text-xl font-bold">{consultants.length}</p>
               </div>
-              <span className="text-xl font-bold">{benchedConsultants.length}</span>
-            </div>
-            
-            <div className="flex flex-col">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-700">Projects Needing Resources</h3>
-                <Briefcase className="h-4 w-4 text-gray-500" />
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Available</p>
+                <p className="text-xl font-bold text-green-500">{benchedConsultants.length}</p>
               </div>
-              <span className="text-xl font-bold">{projectsNeedingResources.length}</span>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Fully Allocated</p>
+                <p className="text-xl font-bold text-red-500">
+                  {consultants.filter(c => c.status === "Allocated").length}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-500">Chargeability</p>
+                <p className="text-xl font-bold text-yellow-500">{chargeability}%</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Resource Allocation</h1>
-          <Button 
-            onClick={handleAutoAllocate}
-            className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
-          >
-            <Brain className="h-4 w-4" />
-            <span>Auto Allocate</span>
-          </Button>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Projects Needing Resources - Now Vertical */}
+          {/* Projects Needing Resources */}
           <div className="bg-white rounded-lg shadow p-6 max-h-[600px] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">Projects Needing Resources</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Projects Needing Resources</h2>
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                {projectsNeedingResources.length} projects
+              </span>
+            </div>
             <div className="space-y-4">
               {projectsNeedingResources.map(project => (
                 <ProjectCard
@@ -199,50 +193,78 @@ const Allocations: React.FC = () => {
             </div>
           </div>
 
-          {/* Project Details - Now showing allocated consultants */}
+          {/* Project Details and Allocated Consultants */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">
               {selectedProject ? `Consultants on ${selectedProject.name}` : 'Select a Project'}
             </h2>
-            {selectedProject ? (
-              <div className="space-y-4">
-                {getAllocatedConsultants(selectedProject.id).length > 0 ? (
-                  getAllocatedConsultants(selectedProject.id).map(consultant => (
-                    <div
-                      key={consultant.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-                    >
-                      <div>
-                        <h3 className="font-medium">{consultant.name}</h3>
-                        <p className="text-sm text-gray-500">{consultant.role}</p>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          // Handle removing consultant - you might want to implement this
-                          toast({
-                            title: "Not Implemented",
-                            description: "Remove consultant functionality coming soon.",
-                          });
-                        }}
-                      >
-                        Remove
-                      </Button>
+
+            {selectedProject && (
+              <>
+                <div className="mb-6 space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Required FTEs</span>
+                      <span className="text-sm text-gray-500">{fteSlider}</span>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No consultants allocated to this project yet.</p>
-                )}
-              </div>
-            ) : (
-              <p className="text-gray-500">Select a project to view allocated consultants</p>
+                    <Slider 
+                      value={[fteSlider]}
+                      max={10}
+                      step={1}
+                      onValueChange={(value) => setFteSlider(value[0])}
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Seniority Mix</span>
+                      <span className="text-sm text-gray-500">{seniorityMix}% Senior</span>
+                    </div>
+                    <Slider 
+                      value={[seniorityMix]}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setSeniorityMix(value[0])}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {getAllocatedConsultants(selectedProject.id).length > 0 ? (
+                    getAllocatedConsultants(selectedProject.id).map(consultant => (
+                      <Card key={consultant.id} className="p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="font-medium">{consultant.name}</h3>
+                            <p className="text-sm text-gray-500">{consultant.role}</p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              // Remove consultant logic would go here
+                              toast({
+                                title: "Not Implemented",
+                                description: "Remove consultant functionality coming soon.",
+                              });
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No consultants allocated to this project yet.</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
 
         {/* Experience Level Filter */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 my-4">
           {(['junior', 'average', 'senior'] as const).map((level) => (
             <Button
               key={level}
@@ -256,7 +278,7 @@ const Allocations: React.FC = () => {
         </div>
 
         {/* Available Consultants */}
-        <div className="mt-6 bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4">Available Consultants</h2>
           <div className="space-y-4">
             {benchedConsultants.map(consultant => (
@@ -281,7 +303,7 @@ const Allocations: React.FC = () => {
       </main>
 
       {/* Move Consultant Modal */}
-      {selectedConsultant && (
+      {selectedConsultant && showMoveModal && (
         <MoveConsultantModal
           isOpen={showMoveModal}
           onClose={() => {
