@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
 import ProjectList from '../components/Projects/ProjectList';
@@ -7,42 +7,113 @@ import ProjectDetail from '../components/Projects/ProjectDetail';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
 import EditProjectDialog from '../components/Projects/EditProjectDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useDataSource } from '@/context/DataSourceContext';
+import { fetchConsultants, fetchProjects } from '@/lib/api';
 import { 
-  consultants, 
-  allocations, 
-  projects, 
-  pipelineOpportunities,
+  consultants as mockConsultants, 
+  allocations as mockAllocations, 
+  projects as mockProjects, 
+  pipelineOpportunities as mockPipelineOpportunities,
   getProjectById,
   getConsultantsForProject
 } from '../data/mockData';
-import { Project } from '@/lib/types';
+import { Project, Consultant, PipelineOpportunity } from '@/lib/types';
 
 const Projects: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const type = searchParams.get('type') as 'active' | 'pipeline' || 'active';
   const { toast } = useToast();
+  const { dataSource, setIsLoading } = useDataSource();
   
   const [activeTab, setActiveTab] = useState<'active' | 'pipeline'>(type || 'active');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [localConsultants, setLocalConsultants] = useState(consultants);
-  const [localAllocations, setLocalAllocations] = useState(allocations);
-  const [localProjects, setLocalProjects] = useState(projects);
-  const [localPipelineOpportunities, setLocalPipelineOpportunities] = useState(pipelineOpportunities);
+  const [localConsultants, setLocalConsultants] = useState(mockConsultants);
+  const [localAllocations, setLocalAllocations] = useState(mockAllocations);
+  const [localProjects, setLocalProjects] = useState(mockProjects);
+  const [localPipelineOpportunities, setLocalPipelineOpportunities] = useState(mockPipelineOpportunities);
+  
+  useEffect(() => {
+    if (dataSource === 'mock') {
+      // Use mock data
+      setLocalConsultants(mockConsultants);
+      setLocalProjects(mockProjects);
+      setLocalPipelineOpportunities(mockPipelineOpportunities);
+      return;
+    }
+    
+    // Use API data
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [consultantsData, projectsData] = await Promise.all([
+          fetchConsultants(),
+          fetchProjects()
+        ]);
+        
+        setLocalConsultants(consultantsData);
+        
+        // Split projects and pipeline opportunities
+        const activeProjects = projectsData.filter(p => 'staffingStatus' in p) as Project[];
+        const pipelineProjects = projectsData.filter(p => !('staffingStatus' in p)) as PipelineOpportunity[];
+        
+        setLocalProjects(activeProjects);
+        setLocalPipelineOpportunities(pipelineProjects);
+        
+        toast({
+          title: "Data loaded successfully",
+          description: `Loaded ${activeProjects.length} active projects and ${pipelineProjects.length} pipeline opportunities from API.`,
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Could not connect to the API. Using mock data instead.",
+          variant: "destructive"
+        });
+        // Fall back to mock data
+        setLocalConsultants(mockConsultants);
+        setLocalProjects(mockProjects);
+        setLocalPipelineOpportunities(mockPipelineOpportunities);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [dataSource, toast, setIsLoading]);
+  
+  // Helper function to get project by ID from the current source
+  const getCurrentProject = (id: string) => {
+    return localProjects.find(p => p.id === id);
+  };
+  
+  // Helper function to get opportunity by ID from the current source
+  const getCurrentOpportunity = (id: string) => {
+    return localPipelineOpportunities.find(o => o.id === id);
+  };
+  
+  // Helper function to get consultants for a project (using current data)
+  const getCurrentConsultantsForProject = (projectId: string): Consultant[] => {
+    const projectAllocations = localAllocations.filter(a => a.projectId === projectId);
+    return localConsultants.filter(c => 
+      projectAllocations.some(a => a.consultantId === c.id)
+    );
+  };
   
   const currentProject = type === 'active' && id 
-    ? getProjectById(id) 
+    ? getCurrentProject(id) 
     : undefined;
   
   const currentOpportunity = type === 'pipeline' && id 
-    ? pipelineOpportunities.find(opportunity => opportunity.id === id) 
+    ? getCurrentOpportunity(id) 
     : undefined;
   
   const currentItem = currentProject || currentOpportunity;
   
   const assignedConsultants = currentProject 
-    ? getConsultantsForProject(currentProject.id)
+    ? getCurrentConsultantsForProject(currentProject.id)
     : [];
   
   const handleAddConsultant = () => {

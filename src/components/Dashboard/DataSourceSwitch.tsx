@@ -4,11 +4,15 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { WifiOff, Wifi } from 'lucide-react';
 
-export function DataSourceSwitch() {
+interface DataSourceSwitchProps {
+  className?: string;
+}
+
+export function DataSourceSwitch({ className = '' }: DataSourceSwitchProps) {
   const { dataSource, toggleDataSource, isLoading } = useDataSource();
   
   return (
-    <div className="flex items-center space-x-2">
+    <div className={`flex items-center space-x-2 ${className}`}>
       <WifiOff className={`h-4 w-4 ${dataSource === 'mock' ? 'text-primary' : 'text-gray-400'}`} />
       <Switch 
         checked={dataSource === 'api'} 

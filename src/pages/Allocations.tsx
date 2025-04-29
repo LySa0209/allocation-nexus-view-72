@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -8,11 +7,13 @@ import { ProjectDetailPanel } from '@/components/Allocation/ProjectDetailPanel';
 import { ConsultantsList } from '@/components/Allocation/ConsultantsList';
 import { AllocatedConsultants } from '@/components/Allocation/AllocatedConsultants';
 import { 
-  consultants as initialConsultants,
-  allocations as initialAllocations,
-  projects as initialProjects,
-  pipelineOpportunities as initialPipeline
+  consultants as mockConsultants,
+  allocations as mockAllocations,
+  projects as mockProjects,
+  pipelineOpportunities as mockPipeline
 } from '../data/mockData';
+import { useDataSource } from '@/context/DataSourceContext';
+import { fetchConsultants, fetchProjects } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
 import { Calendar } from 'lucide-react';
 
@@ -24,10 +25,12 @@ const calculateChargeability = (consultants: Consultant[]): number => {
 
 const Allocations: React.FC = () => {
   const { toast } = useToast();
-  const [consultants, setConsultants] = useState<Consultant[]>(initialConsultants);
-  const [allocations, setAllocations] = useState(initialAllocations);
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [pipelineOpportunities] = useState<PipelineOpportunity[]>(initialPipeline);
+  const { dataSource, setIsLoading } = useDataSource();
+  
+  const [consultants, setConsultants] = useState<Consultant[]>(mockConsultants);
+  const [allocations, setAllocations] = useState(mockAllocations);
+  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [pipelineOpportunities, setPipelineOpportunities] = useState<PipelineOpportunity[]>(mockPipeline);
   const [selectedProject, setSelectedProject] = useState<ProjectOrPipeline | null>(null);
   const [allocatedConsultants, setAllocatedConsultants] = useState<Consultant[]>([]);
   const [selectedConsultantIds, setSelectedConsultantIds] = useState<string[]>([]);
@@ -40,6 +43,59 @@ const Allocations: React.FC = () => {
   // Metrics for KPI bar
   const [chargeability, setChargeability] = useState<number>(0);
   const [partiallyAllocated, setPartiallyAllocated] = useState<number>(0);
+  
+  useEffect(() => {
+    if (dataSource === 'mock') {
+      // Use mock data
+      setConsultants(mockConsultants);
+      setProjects(mockProjects);
+      setPipelineOpportunities(mockPipeline);
+      setAllocations(mockAllocations);
+      return;
+    }
+    
+    // Use API data
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [consultantsData, projectsData] = await Promise.all([
+          fetchConsultants(),
+          fetchProjects()
+        ]);
+        
+        setConsultants(consultantsData);
+        
+        // Split projects and pipeline opportunities
+        const activeProjects = projectsData.filter(p => 'staffingStatus' in p) as Project[];
+        const pipelineProjects = projectsData.filter(p => !('staffingStatus' in p)) as PipelineOpportunity[];
+        
+        setProjects(activeProjects);
+        setPipelineOpportunities(pipelineProjects);
+        
+        // Keep using mock allocations as API doesn't provide them
+        
+        toast({
+          title: "Data loaded successfully",
+          description: `Loaded ${consultantsData.length} consultants and ${projectsData.length} projects from API.`,
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Could not connect to the API. Using mock data instead.",
+          variant: "destructive"
+        });
+        // Fall back to mock data
+        setConsultants(mockConsultants);
+        setProjects(mockProjects);
+        setPipelineOpportunities(mockPipeline);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [dataSource, toast, setIsLoading]);
   
   // Benchmarking metrics
   const benchedConsultants = consultants.filter(c => c.status === "Benched");

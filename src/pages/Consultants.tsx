@@ -1,31 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
 import ConsultantList from '../components/Consultants/ConsultantList';
 import ConsultantDetail from '../components/Consultants/ConsultantDetail';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
 import { 
-  consultants, 
+  consultants as mockConsultants, 
   getConsultantById, 
   getAllocationsForConsultant, 
-  projects,
-  allocations
+  projects as mockProjects,
+  allocations as mockAllocations
 } from '../data/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { useDataSource } from '@/context/DataSourceContext';
+import { fetchConsultants, fetchProjects } from '@/lib/api';
+import { Consultant } from '@/lib/types';
 
 const Consultants: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const { dataSource, setIsLoading } = useDataSource();
   
   const [showMoveModal, setShowMoveModal] = useState(false);
-  const [localConsultants, setLocalConsultants] = useState(consultants);
-  const [localAllocations, setLocalAllocations] = useState(allocations);
-  const [localProjects, setLocalProjects] = useState(projects);
+  const [localConsultants, setLocalConsultants] = useState(mockConsultants);
+  const [localAllocations, setLocalAllocations] = useState(mockAllocations);
+  const [localProjects, setLocalProjects] = useState(mockProjects);
   
-  const consultant = id ? getConsultantById(id) : undefined;
+  useEffect(() => {
+    if (dataSource === 'mock') {
+      // Use mock data
+      setLocalConsultants(mockConsultants);
+      setLocalProjects(mockProjects);
+      setLocalAllocations(mockAllocations);
+      return;
+    }
+    
+    // Fetch data from API
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [consultantsData, projectsData] = await Promise.all([
+          fetchConsultants(),
+          fetchProjects()
+        ]);
+        
+        setLocalConsultants(consultantsData);
+        
+        // Only use projects with staffingStatus property (active projects)
+        const allProjects = projectsData.filter(p => 'staffingStatus' in p);
+        setLocalProjects(allProjects);
+        
+        // Keep using mock allocations for now as API doesn't provide them
+        
+        toast({
+          title: "Data loaded successfully",
+          description: `Loaded ${consultantsData.length} consultants from API.`,
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Could not connect to the API. Using mock data instead.",
+          variant: "destructive"
+        });
+        // Fall back to mock data
+        setLocalConsultants(mockConsultants);
+        setLocalProjects(mockProjects);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [dataSource, toast, setIsLoading]);
+  
+  // Helper function to get consultant by ID from the current data source
+  const getCurrentConsultant = (id: string): Consultant | undefined => {
+    return localConsultants.find(c => c.id === id);
+  };
+  
+  // Helper function to get allocations for a consultant (still using mock data)
+  const getCurrentAllocationsForConsultant = (id: string) => {
+    return localAllocations.filter(a => a.consultantId === id);
+  };
+  
+  const consultant = id ? getCurrentConsultant(id) : undefined;
   
   const consultantAllocations = id 
-    ? getAllocationsForConsultant(id) 
+    ? getCurrentAllocationsForConsultant(id) 
     : [];
   
   const handleMoveConsultant = () => {
