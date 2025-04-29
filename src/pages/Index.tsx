@@ -1,17 +1,91 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, Briefcase, UserCheck, UserMinus, 
   BarChart2, AlertTriangle, Clock 
 } from 'lucide-react';
-import { dashboardMetrics, consultants, projects } from '../data/mockData';
+import { dashboardMetrics as mockDashboardMetrics, consultants as mockConsultants, projects as mockProjects } from '../data/mockData';
+import { fetchConsultants, fetchProjects } from '../lib/api';
 import Navbar from '../components/Layout/Navbar';
 import MetricsCard from '../components/Dashboard/MetricsCard';
 import QuickViewList from '../components/Dashboard/QuickViewList';
+import { DataSourceSwitch } from '../components/Dashboard/DataSourceSwitch';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useDataSource } from '@/context/DataSourceContext';
+import { DashboardMetrics, Consultant, Project, PipelineOpportunity } from '@/lib/types';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { dataSource, setIsLoading } = useDataSource();
+  
+  const [dashboardMetrics, setDashboardMetrics] = useState(mockDashboardMetrics);
+  const [consultants, setConsultants] = useState(mockConsultants);
+  const [projects, setProjects] = useState(mockProjects);
+  
+  useEffect(() => {
+    if (dataSource === 'mock') {
+      // Use mock data
+      setConsultants(mockConsultants);
+      setProjects(mockProjects);
+      setDashboardMetrics(mockDashboardMetrics);
+      return;
+    }
+    
+    // Use API data
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const [consultantsData, projectsData] = await Promise.all([
+          fetchConsultants(),
+          fetchProjects()
+        ]);
+        
+        setConsultants(consultantsData);
+        
+        // Split projects and pipeline opportunities
+        const allProjects = projectsData.filter(p => 'staffingStatus' in p) as Project[];
+        setProjects(allProjects);
+        
+        // Calculate new metrics
+        const benchedConsultants = consultantsData.filter(c => c.status === 'Benched');
+        const allocatedConsultants = consultantsData.filter(c => c.status === 'Allocated');
+        
+        const newMetrics: DashboardMetrics = {
+          totalConsultants: consultantsData.length,
+          allocatedConsultants: allocatedConsultants.length,
+          benchedConsultants: benchedConsultants.length,
+          chargeability: allocatedConsultants.length / (consultantsData.length || 1),
+          activeProjects: allProjects.length,
+          pipelineProjects: projectsData.length - allProjects.length,
+          projectsNeedingResources: allProjects.filter(p => p.staffingStatus === 'Needs Resources').length
+        };
+        
+        setDashboardMetrics(newMetrics);
+        
+        toast({
+          title: "Data loaded successfully",
+          description: `Loaded ${consultantsData.length} consultants and ${projectsData.length} projects from API.`,
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast({
+          title: "Error loading data",
+          description: "Could not connect to the API. Check if your backend is running.",
+          variant: "destructive"
+        });
+        // Fall back to mock data if API fails
+        setConsultants(mockConsultants);
+        setProjects(mockProjects);
+        setDashboardMetrics(mockDashboardMetrics);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [dataSource, toast, setIsLoading]);
   
   // Format data for quick view lists
   const projectsNeedingResources = projects
@@ -40,9 +114,12 @@ const Dashboard: React.FC = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Resource allocation management overview</p>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-500">Resource allocation management overview</p>
+          </div>
+          <DataSourceSwitch />
         </div>
         
         {/* Metrics Cards Grid */}
