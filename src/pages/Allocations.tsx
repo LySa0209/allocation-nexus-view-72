@@ -43,7 +43,7 @@ const Allocations: React.FC = () => {
   
   // Benchmarking metrics
   const benchedConsultants = consultants.filter(c => c.status === "Benched");
-  const allocatedConsultants = consultants.filter(c => c.status === "Allocated");
+  const fullyAllocatedConsultants = consultants.filter(c => c.status === "Allocated");
 
   // Calculate metrics
   useEffect(() => {
@@ -51,8 +51,8 @@ const Allocations: React.FC = () => {
     setChargeability(newChargeability);
     
     // Simulate partially allocated (would normally come from real allocation data)
-    setPartiallyAllocated(Math.floor(allocatedConsultants.length * 0.25));
-  }, [consultants, allocatedConsultants.length]);
+    setPartiallyAllocated(Math.floor(fullyAllocatedConsultants.length * 0.25));
+  }, [consultants, fullyAllocatedConsultants.length]);
 
   // Handle project selection
   const handleSelectProject = (project: ProjectOrPipeline) => {
@@ -110,7 +110,7 @@ const Allocations: React.FC = () => {
           <AllocationKPI 
             totalConsultants={consultants.length}
             availableConsultants={benchedConsultants.length}
-            fullyAllocated={allocatedConsultants.length - partiallyAllocated}
+            fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated}
             partiallyAllocated={partiallyAllocated}
           />
           
