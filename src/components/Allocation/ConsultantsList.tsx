@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultantRanking } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface ConsultantsListProps {
   consultants: Consultant[];
@@ -25,6 +26,7 @@ export const ConsultantsList = ({
   selectedConsultants,
   selectedProjectId
 }: ConsultantsListProps) => {
+  const { toast } = useToast();
   const { dataSource, setIsLoading } = useDataSource();
   const [searchTerm, setSearchTerm] = useState('');
   const [seniorityFilter, setSeniorityFilter] = useState<SeniorityFilter>('all');
@@ -49,14 +51,27 @@ export const ConsultantsList = ({
           n: 50
         });
         
+        console.log('Ranking result:', rankingResult);
+        
         // Map the returned IDs to actual consultant objects
         const rankedConsultantsList = rankingResult.ranking
           .map(id => consultants.find(c => c.id === String(id)))
           .filter(Boolean) as Consultant[];
           
+        console.log('Ranked consultants:', rankedConsultantsList);
         setRankedConsultants(rankedConsultantsList);
+        
+        toast({
+          title: "Consultants Ranked",
+          description: `Showing ${rankingResult.ranking.length} ranked consultants for ${teamStructure} team structure.`,
+        });
       } catch (error) {
         console.error('Error fetching ranked consultants:', error);
+        toast({
+          title: "Ranking Failed",
+          description: "Could not fetch consultant rankings. Using default list instead.",
+          variant: "destructive"
+        });
         // Fall back to default filtering if API fails
         setRankedConsultants([]);
       } finally {
@@ -64,8 +79,9 @@ export const ConsultantsList = ({
       }
     };
 
+    console.log('Fetching ranked consultants for project:', selectedProjectId, 'with team structure:', teamStructure);
     fetchRankedConsultants();
-  }, [selectedProjectId, teamStructure, dataSource, consultants, setIsLoading]);
+  }, [selectedProjectId, teamStructure, dataSource, consultants, setIsLoading, toast]);
 
   // Determine which consultants to display
   const displayConsultants = rankedConsultants.length > 0 
@@ -75,11 +91,11 @@ export const ConsultantsList = ({
   const filterConsultantBySeniority = (consultant: Consultant): boolean => {
     if (seniorityFilter === 'all') return true;
     if (seniorityFilter === 'leadership') {
-      return ['Senior Partner', 'Partner', 'Associate Partner', 'Principal'].some(role => 
+      return ['Senior Partner', 'Partner', 'Associate Partner', 'Principal', 'Senior Manager'].some(role => 
         consultant.role.toLowerCase().includes(role.toLowerCase())
       );
     }
-    return ['Consultant', 'Senior Consultant', 'Associate'].some(role => 
+    return ['Consultant', 'Senior Consultant', 'Associate', 'Analyst'].some(role => 
       consultant.role.toLowerCase().includes(role.toLowerCase())
     );
   };

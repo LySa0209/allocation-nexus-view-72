@@ -15,7 +15,6 @@ import {
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
-import { Calendar } from 'lucide-react';
 
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
@@ -112,6 +111,7 @@ const Allocations: React.FC = () => {
 
   // Handle project selection
   const handleSelectProject = (project: ProjectOrPipeline) => {
+    console.log('Selected project:', project);
     setSelectedProject(project);
     
     // Reset project sliders

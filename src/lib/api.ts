@@ -89,12 +89,9 @@ interface ConsultantRankingParams {
   start?: Date;
 }
 
-interface ConsultantRankingResponse {
-  ranking: number[];
-}
-
-export async function fetchConsultantRanking(params: ConsultantRankingParams): Promise<ConsultantRankingResponse> {
+export async function fetchConsultantRanking(params: ConsultantRankingParams): Promise<{ ranking: number[] }> {
   try {
+    console.log('Fetching consultant ranking with params:', params);
     const response = await fetch(`${API_URL}/ranking`, {
       method: 'POST',
       headers: {
@@ -109,6 +106,7 @@ export async function fetchConsultantRanking(params: ConsultantRankingParams): P
     }
     
     const data = await response.json();
+    console.log('Received ranking data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching consultant ranking:', error);
