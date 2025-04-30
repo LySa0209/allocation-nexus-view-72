@@ -1,26 +1,76 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Consultant } from '@/lib/types';
 import { Toggle } from '@/components/ui/toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { useDataSource } from '@/context/DataSourceContext';
+import { fetchConsultantRanking } from '@/lib/api';
 
 interface ConsultantsListProps {
   consultants: Consultant[];
   onAllocateConsultant: (consultant: Consultant) => void;
   selectedConsultants: string[];
+  selectedProjectId: string | null;
 }
 
 type SeniorityFilter = 'all' | 'leadership' | 'individual';
+type TeamStructure = 'lean' | 'balanced' | 'expert';
 
 export const ConsultantsList = ({
   consultants,
   onAllocateConsultant,
-  selectedConsultants
+  selectedConsultants,
+  selectedProjectId
 }: ConsultantsListProps) => {
+  const { dataSource, setIsLoading } = useDataSource();
   const [searchTerm, setSearchTerm] = useState('');
   const [seniorityFilter, setSeniorityFilter] = useState<SeniorityFilter>('all');
+  const [teamStructure, setTeamStructure] = useState<TeamStructure>('balanced');
+  const [rankedConsultants, setRankedConsultants] = useState<Consultant[]>([]);
+
+  // Fetch ranked consultants when project or team structure changes
+  useEffect(() => {
+    if (!selectedProjectId || dataSource !== 'api') {
+      // Use default consultant list if no project selected or not using API
+      setRankedConsultants([]);
+      return;
+    }
+
+    const fetchRankedConsultants = async () => {
+      try {
+        setIsLoading(true);
+        const rankingResult = await fetchConsultantRanking({
+          allocation_strategy: 'new',
+          team_structure: teamStructure,
+          project_id: selectedProjectId,
+          n: 50
+        });
+        
+        // Map the returned IDs to actual consultant objects
+        const rankedConsultantsList = rankingResult.ranking
+          .map(id => consultants.find(c => c.id === String(id)))
+          .filter(Boolean) as Consultant[];
+          
+        setRankedConsultants(rankedConsultantsList);
+      } catch (error) {
+        console.error('Error fetching ranked consultants:', error);
+        // Fall back to default filtering if API fails
+        setRankedConsultants([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRankedConsultants();
+  }, [selectedProjectId, teamStructure, dataSource, consultants, setIsLoading]);
+
+  // Determine which consultants to display
+  const displayConsultants = rankedConsultants.length > 0 
+    ? rankedConsultants 
+    : consultants;
 
   const filterConsultantBySeniority = (consultant: Consultant): boolean => {
     if (seniorityFilter === 'all') return true;
@@ -34,7 +84,7 @@ export const ConsultantsList = ({
     );
   };
 
-  const filteredConsultants = consultants.filter(consultant => {
+  const filteredConsultants = displayConsultants.filter(consultant => {
     const matchesSearch = searchTerm === '' || 
       consultant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       consultant.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,7 +92,10 @@ export const ConsultantsList = ({
       
     const matchesSeniority = filterConsultantBySeniority(consultant);
     
-    return matchesSearch && matchesSeniority && consultant.status === "Benched";
+    // Only show benched consultants if not using ranked list
+    const statusCheck = rankedConsultants.length > 0 ? true : consultant.status === "Benched";
+    
+    return matchesSearch && matchesSeniority && statusCheck;
   });
 
   // Calculate how much of a consultant is allocated (mock data)
@@ -89,6 +142,22 @@ export const ConsultantsList = ({
           </Toggle>
         </div>
       </div>
+
+      {selectedProjectId && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-500 mb-2">Team Structure:</p>
+          <ToggleGroup 
+            type="single" 
+            value={teamStructure} 
+            onValueChange={(value) => value && setTeamStructure(value as TeamStructure)}
+            className="flex justify-start"
+          >
+            <ToggleGroupItem value="lean" className="px-3 py-1 text-sm">Lean</ToggleGroupItem>
+            <ToggleGroupItem value="balanced" className="px-3 py-1 text-sm">Balanced</ToggleGroupItem>
+            <ToggleGroupItem value="expert" className="px-3 py-1 text-sm">Expert</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      )}
 
       <div className="mb-4 relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

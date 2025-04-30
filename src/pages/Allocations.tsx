@@ -194,6 +194,7 @@ const Allocations: React.FC = () => {
             consultants={consultants}
             onAllocateConsultant={handleAllocateConsultant}
             selectedConsultants={selectedConsultantIds}
+            selectedProjectId={selectedProject?.id || null}
           />
           
           {/* Bottom Right - Allocated Consultants */}
