@@ -188,8 +188,8 @@ export const ConsultantsList = ({
         />
       </div>
 
-      <ScrollArea className="h-[calc(100%-100px)] pr-4">
-        <div className="space-y-2">
+      <ScrollArea className="h-[calc(80%-100px)] pr-4">
+        <div className="space-y-2  pb-4">
           {filteredConsultants.length === 0 ? (
             <p className="text-gray-500 text-center py-4">No consultants available matching your criteria</p>
           ) : (

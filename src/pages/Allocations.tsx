@@ -162,6 +162,7 @@ const Allocations: React.FC = () => {
       
       <main className="container mx-auto px-4 py-4">
         <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-[auto,1fr,1fr] gap-4 h-[calc(100vh-100px)]">
+
           {/* KPI Bar */}
           <AllocationKPI 
             totalConsultants={consultants.length}
@@ -178,6 +179,8 @@ const Allocations: React.FC = () => {
             selectedProjectId={selectedProject?.id || null}
           />
           
+          <div className="max-h-[calc(70vh-200px)]">
+            {/* fixed height that adapts to screen size */}
           {/* Top Right - Project Details */}
           <ProjectDetailPanel 
             project={selectedProject}
@@ -188,7 +191,9 @@ const Allocations: React.FC = () => {
             priorityValue={priorityValue}
             onPriorityChange={setPriorityValue}
           />
+          </div>
           
+          <div className="max-h-[calc(100vh-200px)]">
           {/* Bottom Left - Available Consultants */}
           <ConsultantsList 
             consultants={consultants}
@@ -196,6 +201,7 @@ const Allocations: React.FC = () => {
             selectedConsultants={selectedConsultantIds}
             selectedProjectId={selectedProject?.id || null}
           />
+          </div>
           
           {/* Bottom Right - Allocated Consultants */}
           <AllocatedConsultants 
@@ -203,6 +209,8 @@ const Allocations: React.FC = () => {
             onRemoveConsultant={handleRemoveConsultant}
             requiredFTEs={fteValue}
           />
+          
+        <div className="h-1" /> {/* Spacer below the last row */}
         </div>
       </main>
     </div>

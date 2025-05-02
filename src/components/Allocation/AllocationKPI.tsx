@@ -15,7 +15,7 @@ export const AllocationKPI = ({
   partiallyAllocated
 }: AllocationKPIProps) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-4 col-span-2">
+    <div className="bg-white rounded-lg shadow p-4 col-span-2">
       <div className="flex justify-between items-center">
         <div>
           <h3 className="font-semibold text-lg">Resource Allocation Dashboard</h3>

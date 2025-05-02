@@ -84,9 +84,9 @@ export async function fetchProjects(): Promise<(Project | PipelineOpportunity)[]
 interface ConsultantRankingParams {
   allocation_strategy: 'new' | 'existing';
   team_structure: 'lean' | 'balanced' | 'expert';
-  project_id: string;
+  project_id: number;
   n: number;
-  start?: Date;
+  start?: number;
 }
 
 export async function fetchConsultantRanking(params: ConsultantRankingParams): Promise<{ ranking: number[] }> {

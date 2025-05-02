@@ -28,7 +28,7 @@ export const ProjectDetailPanel = ({
         <h3 className="font-semibold mb-4">Project Details</h3>
         <p className="text-gray-500 text-center py-8">Select a project to view details</p>
       </div>
-    );
+    );    
   }
 
   // Generate some mock skills based on the project sector
