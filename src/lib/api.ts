@@ -86,7 +86,7 @@ interface ConsultantRankingParams {
   team_structure: 'lean' | 'balanced' | 'expert';
   project_id: number;
   n: number;
-  start?: number;
+  start?: Date;
 }
 
 export async function fetchConsultantRanking(params: ConsultantRankingParams): Promise<{ ranking: number[] }> {

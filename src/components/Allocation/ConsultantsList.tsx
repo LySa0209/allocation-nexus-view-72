@@ -48,14 +48,14 @@ export const ConsultantsList = ({
           allocation_strategy: 'new',
           team_structure: teamStructure,
           project_id: selectedProjectId,
-          n: 50
+          n: 20
         });
         
         console.log('Ranking result:', rankingResult);
         
         // Map the returned IDs to actual consultant objects
         const rankedConsultantsList = rankingResult.ranking
-          .map(id => consultants.find(c => c.id === String(id)))
+          .map(r => consultants.find(c => c.id == r.id)) //only double == to ensure it works across differnt types.
           .filter(Boolean) as Consultant[];
           
         console.log('Ranked consultants:', rankedConsultantsList);
