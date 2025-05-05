@@ -113,3 +113,26 @@ export async function fetchConsultantRanking(params: ConsultantRankingParams): P
     throw error;
   }
 }
+
+export async function addConsultantsToProject(consultantIds: string[], projectId: string): Promise<any> {
+  try {
+    const response = await fetch(`${API_URL}/add-consultants-to-project`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        consultant_ids: consultantIds,
+        project_id: projectId,
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to allocate consultants');
+    }
+    return data;
+  } catch (error) {
+    console.error('Error allocating consultants:', error);
+    throw error;
+  }
+}

@@ -13,7 +13,7 @@ import {
   pipelineOpportunities as mockPipeline
 } from '../data/mockData';
 import { useDataSource } from '@/context/DataSourceContext';
-import { fetchConsultants, fetchProjects } from '@/lib/api';
+import { fetchConsultants, fetchProjects, addConsultantsToProject } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
 
 const calculateChargeability = (consultants: Consultant[]): number => {
@@ -47,6 +47,9 @@ const Allocations: React.FC = () => {
   const allocatedConsultantsRef = useRef<HTMLDivElement>(null);
   const [consultantsListMinHeight, setConsultantsListMinHeight] = useState<number | undefined>(undefined);
   
+  // Confirm allocation loading state
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
   useEffect(() => {
     if (dataSource === 'mock') {
       // Use mock data
@@ -174,6 +177,31 @@ const Allocations: React.FC = () => {
     setAllocatedConsultants(prev => prev.filter(c => c.id !== consultantId));
   };
 
+  // Handle confirm allocation
+  const handleConfirmAllocation = async () => {
+    if (!selectedProject || allocatedConsultants.length === 0) return;
+    setConfirmLoading(true);
+    try {
+      await addConsultantsToProject(
+        allocatedConsultants.map(c => c.id),
+        selectedProject.id
+      );
+      toast({
+        title: 'Allocation successful',
+        description: `Allocated ${allocatedConsultants.length} consultant(s) to project ${selectedProject.name}.`,
+        variant: 'success',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Allocation failed',
+        description: error.message || 'Could not allocate consultants.',
+        variant: 'destructive',
+      });
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -227,6 +255,8 @@ const Allocations: React.FC = () => {
               consultants={allocatedConsultants}
               onRemoveConsultant={handleRemoveConsultant}
               requiredFTEs={fteValue}
+              onConfirmAllocation={handleConfirmAllocation}
+              confirmLoading={confirmLoading}
             />
           </div>
           

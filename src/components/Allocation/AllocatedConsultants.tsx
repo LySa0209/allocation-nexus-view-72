@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,12 +7,16 @@ interface AllocatedConsultantsProps {
   consultants: Consultant[];
   onRemoveConsultant: (consultantId: string) => void;
   requiredFTEs: number;
+  onConfirmAllocation?: () => void;
+  confirmLoading?: boolean;
 }
 
 export const AllocatedConsultants = ({
   consultants,
   onRemoveConsultant,
-  requiredFTEs
+  requiredFTEs,
+  onConfirmAllocation,
+  confirmLoading
 }: AllocatedConsultantsProps) => {
   // Calculate total allocation percentage (mock data for now)
   const getAllocationPercentage = (consultant: Consultant): number => {
@@ -76,9 +79,10 @@ export const AllocatedConsultants = ({
 
         <Button 
           className="mt-4 w-full" 
-          disabled={consultants.length === 0}
+          disabled={consultants.length === 0 || confirmLoading}
+          onClick={onConfirmAllocation}
         >
-          Confirm Allocation
+          {confirmLoading ? 'Allocating...' : 'Confirm Allocation'}
         </Button>
       </div>
     </div>
