@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search } from 'lucide-react';
+import { Search, User, Star, X, Check, MapPin } from 'lucide-react';
 import { Consultant } from '@/lib/types';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,7 +12,7 @@ interface ConsultantsListProps {
   consultants: Consultant[];
   onAllocateConsultant: (consultant: Consultant) => void;
   selectedConsultants: string[];
-  selectedProjectId: string | null;
+  selectedProjectId: string | number | null;
 }
 
 type SeniorityFilter = 'all' | 'Senior Manager' | 'Senior Consultant' | 'Consultant' | 'Manager' | 'Partner';
@@ -46,16 +46,22 @@ export const ConsultantsList = ({
         const rankingResult = await fetchConsultantRanking({
           allocation_strategy: 'new',
           team_structure: teamStructure,
-          project_id: selectedProjectId,
+          project_id: Number(selectedProjectId),
           n: 20
         });
         
         console.log('Ranking result:', rankingResult);
         
-        // Map the returned IDs to actual consultant objects
-        const rankedConsultantsList = rankingResult.ranking
-          .map(r => consultants.find(c => c.id == r.id)) //only double == to ensure it works across differnt types.
-          .filter(Boolean) as Consultant[];
+        // Map the returned IDs to actual consultant objects and add score
+        const rankedConsultantsList = (rankingResult.ranking as { id: string | number, score: number }[])
+          .map((r) => {
+            const consultant = consultants.find(c => c.id == r.id);
+            if (consultant) {
+              return { ...consultant, score: (r.score+3)*10, flag: r.flag };
+            }
+            return undefined;
+          })
+          .filter(Boolean) as (Consultant & { score: number })[];
           
         console.log('Ranked consultants:', rankedConsultantsList);
         setRankedConsultants(rankedConsultantsList);
@@ -85,9 +91,9 @@ export const ConsultantsList = ({
   }, [selectedProjectId, teamStructure, dataSource, consultants, setIsLoading, toast]);
 
   // Determine which consultants to display
-  const displayConsultants = rankedConsultants.length > 0 
+  const displayConsultants: (Consultant & { score?: number })[] = rankedConsultants.length > 0 
     ? rankedConsultants 
-    : consultants;
+    : consultants.map(c => ({ ...c, score: 0 }));
 
   const filterConsultantBySeniority = (consultant: Consultant): boolean => {
     if (seniorityFilter === 'all') return true;
@@ -190,35 +196,93 @@ export const ConsultantsList = ({
             filteredConsultants.map(consultant => {
               const allocationPercentage = getAllocationPercentage(consultant);
               const isSelected = selectedConsultants.includes(consultant.id);
-              
+              const scoreColor = (consultant.score ?? 0) >= 80 ? 'bg-green-100 text-green-800' :
+                                (consultant.score ?? 0) >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800';
+
               return (
                 <div 
                   key={consultant.id}
-                  className={`p-3 rounded-md hover:bg-gray-50 ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
+                  className={`p-2 rounded-lg mb-1 transition-all flex items-center min-h-0 ${isSelected ? 
+                    'bg-blue-50 border-l-4 border-blue-500 shadow-sm' : 
+                    'hover:bg-gray-50 hover:shadow-sm'}`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{consultant.name}</p>
-                      <p className="text-xs text-gray-500">{consultant.role} • {consultant.expertise}</p>
-                    </div>
+                  {/* Left Section - Consultant Info */}
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3">
+                      <User className={`h-5 w-5 ${consultant.flag === 'core' ? 'text-purple-500' : 'text-gray-400'}`} />
                       <div>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`${getBgColorForAllocation(allocationPercentage)} h-2 rounded-full`} 
-                            style={{ width: `${allocationPercentage}%` }} 
-                          />
+                        <h3 className="font-semibold text-gray-900 truncate flex items-center">
+                          {consultant.name}
+                          {consultant.location && (
+                            <span className="flex items-center ml-2 text-xs text-gray-500 font-normal">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              {consultant.location}
+                            </span>
+                          )}
+                          {(consultant.score ?? 0) >= 80 && (
+                            <Star className="h-4 w-4 ml-2 inline text-yellow-500" />
+                          )}
+                          {consultant.flag === 'core' && (
+                            <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold border border-purple-300">Core</span>
+                          )}
+                        </h3>
+                        <div className="text-sm text-gray-500 flex items-center space-x-2">
+                          <span>{consultant.role}</span>
+                          <span className="text-xs">•</span>
+                          <div className="flex space-x-1">
+                            {consultant.expertise.split(',').map((exp, i) => (
+                              <span 
+                                key={i}
+                                className="text-xs"
+                              >
+                                {exp.trim()}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-500 text-right">{allocationPercentage}% allocated</p>
                       </div>
-                      <Button
-                        onClick={() => onAllocateConsultant(consultant)}
-                        variant={isSelected ? "destructive" : "outline"}
-                        size="sm"
-                      >
-                        {isSelected ? 'Remove' : 'Allocate'}
-                      </Button>
                     </div>
+                  </div>
+
+                  {/* Right Section - Metrics and Actions */}
+                  <div className="flex items-center space-x-4 ml-auto">
+                    <div className="text-center">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${scoreColor}`}>
+                        <span className="text-xs font-medium">{consultant.score ?? 0}%</span>
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-0.5">Match</p>
+                    </div>
+                    <div className="w-20">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[10px] text-gray-500">Alloc</span>
+                        <span className="text-[10px] text-gray-500">{allocationPercentage}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className={`${getBgColorForAllocation(allocationPercentage)} h-1.5 rounded-full`} 
+                          style={{ width: `${allocationPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => onAllocateConsultant(consultant)}
+                      variant={isSelected ? "destructive" : "outline"}
+                      size="sm"
+                      className="transition-all"
+                    >
+                      {isSelected ? (
+                        <>
+                          <X className="h-4 w-4 mr-2" />
+                          Remove
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Allocate
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               );
