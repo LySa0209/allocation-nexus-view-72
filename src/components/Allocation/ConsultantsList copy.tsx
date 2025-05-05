@@ -154,7 +154,6 @@ export const ConsultantsList = ({
           </div>
         </div>
       )}
-
       <div className="mb-4 flex items-center gap-2 relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-4 w-4 text-gray-400" />
@@ -179,61 +178,55 @@ export const ConsultantsList = ({
           <option value="Partner">Partner</option>
         </select>
       </div>
-      
-      {/* Ensure the project is selected before populating bottom left box  */}
-      {selectedProjectId ? ( 
-      <ScrollArea className="h-[calc(100%-150px)] pr-4">
-        <div className="space-y-2  pb-4">
-          {filteredConsultants.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No consultants available matching your criteria</p>
-          ) : (
-            filteredConsultants.map(consultant => {
-              const allocationPercentage = getAllocationPercentage(consultant);
-              const isSelected = selectedConsultants.includes(consultant.id);
-              
-              return (
-                <div 
-                  key={consultant.id}
-                  className={`p-3 rounded-md hover:bg-gray-50 ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium">{consultant.name}</p>
-                      <p className="text-xs text-gray-500">{consultant.role} • {consultant.expertise}</p>
-                    </div>
-                    <div className="flex items-center space-x-3">
+      {selectedProjectId ? (
+        <ScrollArea className="h-[calc(100%-4px)] pr-4">
+          <div className="space-y-2  pb-4">
+            {filteredConsultants.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No consultants available matching your criteria</p>
+            ) : (
+              filteredConsultants.map(consultant => {
+                const allocationPercentage = getAllocationPercentage(consultant);
+                const isSelected = selectedConsultants.includes(consultant.id);
+                return (
+                  <div 
+                    key={consultant.id}
+                    className={`p-3 rounded-md hover:bg-gray-50 ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
+                  >
+                    <div className="flex justify-between items-center">
                       <div>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`${getBgColorForAllocation(allocationPercentage)} h-2 rounded-full`} 
-                            style={{ width: `${allocationPercentage}%` }} 
-                          />
-                        </div>
-                        <p className="text-xs text-gray-500 text-right">{allocationPercentage}% allocated</p>
+                        <p className="font-medium">{consultant.name}</p>
+                        <p className="text-xs text-gray-500">{consultant.role} • {consultant.expertise}</p>
                       </div>
-                      <Button
-                        onClick={() => onAllocateConsultant(consultant)}
-                        variant={isSelected ? "destructive" : "outline"}
-                        size="sm"
-                      >
-                        {isSelected ? 'Remove' : 'Allocate'}
-                      </Button>
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`${getBgColorForAllocation(allocationPercentage)} h-2 rounded-full`} 
+                              style={{ width: `${allocationPercentage}%` }} 
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 text-right">{allocationPercentage}% allocated</p>
+                        </div>
+                        <Button
+                          onClick={() => onAllocateConsultant(consultant)}
+                          variant={isSelected ? "destructive" : "outline"}
+                          size="sm"
+                        >
+                          {isSelected ? 'Remove' : 'Allocate'}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </ScrollArea>
-
+                );
+              })
+            )}
+          </div>
+        </ScrollArea>
       ) : (
         <div className="h-full flex items-center justify-center">
           <p className="text-gray-500 text-center relative -top-[100px]">Select a project to view available consultants</p>
         </div>
       )}
-      {/* end of check for selected project */}
-
     </div>
   );
 };

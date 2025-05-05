@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
 import { AllocationKPI } from '@/components/Allocation/AllocationKPI';
@@ -42,6 +42,10 @@ const Allocations: React.FC = () => {
   // Metrics for KPI bar
   const [chargeability, setChargeability] = useState<number>(0);
   const [partiallyAllocated, setPartiallyAllocated] = useState<number>(0);
+
+  const consultantsListRef = useRef<HTMLDivElement>(null);
+  const allocatedConsultantsRef = useRef<HTMLDivElement>(null);
+  const [consultantsListMinHeight, setConsultantsListMinHeight] = useState<number | undefined>(undefined);
   
   useEffect(() => {
     if (dataSource === 'mock') {
@@ -108,6 +112,20 @@ const Allocations: React.FC = () => {
     // Simulate partially allocated (would normally come from real allocation data)
     setPartiallyAllocated(Math.floor(fullyAllocatedConsultants.length * 0.25));
   }, [consultants, fullyAllocatedConsultants.length]);
+
+  useEffect(() => {
+    if (consultantsListRef.current && allocatedConsultantsRef.current) {
+      const allocatedHeight = allocatedConsultantsRef.current.offsetHeight;
+      const consultantsHeight = consultantsListRef.current.offsetHeight;
+      if (allocatedHeight > consultantsHeight) {
+        setConsultantsListMinHeight(allocatedHeight);
+        consultantsListRef.current.style.minHeight = allocatedHeight + 'px';
+      } else {
+        setConsultantsListMinHeight(undefined);
+        consultantsListRef.current.style.minHeight = '';
+      }
+    }
+  }, [allocatedConsultants]);
 
   // Handle project selection
   const handleSelectProject = (project: ProjectOrPipeline) => {
@@ -193,7 +211,7 @@ const Allocations: React.FC = () => {
           />
           </div>
           
-          <div className="max-h-[calc(100vh-200px)]">
+          <div className="max-h-[calc(100vh-200px)]" ref={consultantsListRef}>
           {/* Bottom Left - Available Consultants */}
           <ConsultantsList 
             consultants={consultants}
@@ -204,11 +222,13 @@ const Allocations: React.FC = () => {
           </div>
           
           {/* Bottom Right - Allocated Consultants */}
-          <AllocatedConsultants 
-            consultants={allocatedConsultants}
-            onRemoveConsultant={handleRemoveConsultant}
-            requiredFTEs={fteValue}
-          />
+          <div ref={allocatedConsultantsRef}>
+            <AllocatedConsultants 
+              consultants={allocatedConsultants}
+              onRemoveConsultant={handleRemoveConsultant}
+              requiredFTEs={fteValue}
+            />
+          </div>
           
         <div className="h-1" /> {/* Spacer below the last row */}
         </div>

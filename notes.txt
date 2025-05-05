@@ -1,0 +1,15 @@
+Notes for next steps:
+
+In available consultants
+    better graphics
+    DONE bottom left box, maximum height increases with height of the box on the right
+    add match score visual --> add score to api return and also in order of core flagged first
+    add the core/non core flag/colour like when selected
+
+
+Ensure when a project already has allocated consultants, when selected it should display it
+New api:
+    to confirm and commit the allocation
+
+
+In the list of projects, order them according to starting date, win prob, importance.
