@@ -13,7 +13,7 @@ import {
   pipelineOpportunities as mockPipeline
 } from '../data/mockData';
 import { useDataSource } from '@/context/DataSourceContext';
-import { fetchConsultants, fetchProjects, addConsultantsToProject } from '@/lib/api';
+import { fetchConsultants, fetchProjects, addConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
 
 const calculateChargeability = (consultants: Consultant[]): number => {
@@ -131,7 +131,7 @@ const Allocations: React.FC = () => {
   }, [allocatedConsultants]);
 
   // Handle project selection
-  const handleSelectProject = (project: ProjectOrPipeline) => {
+  const handleSelectProject = async (project: ProjectOrPipeline) => {
     console.log('Selected project:', project);
     setSelectedProject(project);
     
@@ -142,12 +142,29 @@ const Allocations: React.FC = () => {
     setSeniorityMix(60); // Default to 60% senior
     setPriorityValue(2); // Default to medium priority
     
-    // Get currently allocated consultants for this project
-    const projectConsultants = getConsultantsForProject(project.id);
-    setAllocatedConsultants(projectConsultants);
-    
-    // Update selected consultants
-    setSelectedConsultantIds(projectConsultants.map(c => c.id));
+    if (dataSource === 'api') {
+      try {
+        setIsLoading(true);
+        const projectConsultants = await fetchProjectConsultants(project.id);
+        setAllocatedConsultants(projectConsultants);
+        setSelectedConsultantIds(projectConsultants.map(c => c.id));
+      } catch (error) {
+        toast({
+          title: 'Error loading allocated consultants',
+          description: 'Could not fetch allocated consultants from API.',
+          variant: 'destructive',
+        });
+        setAllocatedConsultants([]);
+        setSelectedConsultantIds([]);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Get currently allocated consultants for this project (mock)
+      const projectConsultants = getConsultantsForProject(project.id);
+      setAllocatedConsultants(projectConsultants);
+      setSelectedConsultantIds(projectConsultants.map(c => c.id));
+    }
   };
 
   // Get consultants allocated to a specific project
@@ -191,6 +208,12 @@ const Allocations: React.FC = () => {
         description: `Allocated ${allocatedConsultants.length} consultant(s) to project ${selectedProject.name}.`,
         variant: 'success',
       });
+      // Refresh allocated consultants from API after allocation
+      if (dataSource === 'api') {
+        const projectConsultants = await fetchProjectConsultants(selectedProject.id);
+        setAllocatedConsultants(projectConsultants);
+        setSelectedConsultantIds(projectConsultants.map(c => c.id));
+      }
     } catch (error: any) {
       toast({
         title: 'Allocation failed',

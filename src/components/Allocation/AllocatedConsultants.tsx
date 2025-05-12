@@ -1,10 +1,17 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, User, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Consultant } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+
+// Extend Consultant type for local use to allow score property
+interface AllocatedConsultant extends Consultant {
+  score?: number;
+  flag?: string;
+}
 
 interface AllocatedConsultantsProps {
-  consultants: Consultant[];
+  consultants: AllocatedConsultant[];
   onRemoveConsultant: (consultantId: string) => void;
   requiredFTEs: number;
   onConfirmAllocation?: () => void;
@@ -46,19 +53,56 @@ export const AllocatedConsultants = ({
         <div className="space-y-3">
           {consultants.map(consultant => {
             const allocationPercentage = getAllocationPercentage(consultant);
-            
+            const scoreColor = (consultant.score ?? 0) >= 80 ? 'bg-green-100 text-green-800' :
+                              (consultant.score ?? 0) >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800';
             return (
-              <div key={consultant.id} className="allocated-item p-3 rounded-md bg-blue-50 group">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{consultant.name}</p>
-                    <p className="text-xs text-gray-500">{consultant.role} • {allocationPercentage}% allocation</p>
+              <div key={consultant.id} className="allocated-item p-2 rounded-md bg-blue-50 group flex items-center justify-between">
+                {/* Left: Consultant Info */}
+                <div className="flex items-center space-x-3 min-w-0">
+                  <User className={`h-5 w-5 ${consultant.flag === 'core' ? 'text-purple-500' : 'text-gray-400'}`} />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate flex items-center">
+                      {consultant.name}
+                      {consultant.location && (
+                        <span className="flex items-center ml-2 text-xs text-gray-500 font-normal">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {consultant.location}
+                        </span>
+                      )}
+                      {(consultant.score ?? 0) >= 80 && (
+                        <Star className="h-4 w-4 ml-2 inline text-yellow-500" />
+                      )}
+                      {consultant.flag === 'core' && (
+                        <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold border border-purple-300">Core</span>
+                      )}
+                    </h3>
+                    <div className="text-sm text-gray-500 flex items-center space-x-2">
+                      <span>{consultant.role}</span>
+                      <span className="text-xs">•</span>
+                      <span>{consultant.expertise}</span>
+                    </div>
+                    
+                  </div>
+                  {/* {consultant.score !== undefined && (
+                      <Badge className={`mt-1 w-fit ${scoreColor}`}>Score: {consultant.score}</Badge>
+                    )} */}
+                  
+                </div>
+                {/* Right: Remove button */}
+                <div className="flex items-center gap-6 ml-4 mr-4">
+                  <div className="text-right">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${scoreColor}`}>
+                      <span className="text-xs font-medium">{consultant.score ?? 0}%</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Match</p>
                   </div>
                   <button 
                     onClick={() => onRemoveConsultant(consultant.id)}
-                    className="remove-btn text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="text-red-500 hover:text-red-700"
+                    title="Remove consultant"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-7 w-7" />
                   </button>
                 </div>
               </div>

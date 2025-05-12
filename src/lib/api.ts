@@ -136,3 +136,38 @@ export async function addConsultantsToProject(consultantIds: string[], projectId
     throw error;
   }
 }
+
+export async function fetchProjectConsultants(projectId: string | number): Promise<Consultant[]> {
+  try {
+    const response = await fetch(`${API_URL}/project-consultants`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project_id: projectId }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch project consultants');
+    }
+    const data = await response.json();
+    return data.map((item: any) => ({
+      id: String(item.id),
+      name: item.name,
+      role: item.role,
+      serviceLine: item.service_line,
+      expertise: item.expertise,
+      status: item.status,
+      currentProject: projectId,
+      rate: item.revenue_rate,
+      preferredSector: item.preferred_sector,
+      location: item.location,
+      startDate: undefined, // Not provided by API
+      endDate: undefined,   // Not provided by API
+      score: item.score,    // For display if needed
+    }));
+  } catch (error) {
+    console.error('Error fetching project consultants:', error);
+    throw error;
+  }
+}
