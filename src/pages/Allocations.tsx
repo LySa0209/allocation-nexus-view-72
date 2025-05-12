@@ -13,7 +13,7 @@ import {
   pipelineOpportunities as mockPipeline
 } from '../data/mockData';
 import { useDataSource } from '@/context/DataSourceContext';
-import { fetchConsultants, fetchProjects, addConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
+import { fetchConsultants, fetchProjects, setConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
 
 const calculateChargeability = (consultants: Consultant[]): number => {
@@ -199,14 +199,19 @@ const Allocations: React.FC = () => {
     if (!selectedProject || allocatedConsultants.length === 0) return;
     setConfirmLoading(true);
     try {
-      await addConsultantsToProject(
+      // Log the request payload
+      console.log('Confirm Allocation Payload:', {
+        consultantIds: allocatedConsultants.map(c => c.id),
+        projectId: selectedProject.id
+      });
+      await setConsultantsToProject(
         allocatedConsultants.map(c => c.id),
         selectedProject.id
       );
       toast({
         title: 'Allocation successful',
         description: `Allocated ${allocatedConsultants.length} consultant(s) to project ${selectedProject.name}.`,
-        variant: 'success',
+        variant: 'default',
       });
       // Refresh allocated consultants from API after allocation
       if (dataSource === 'api') {

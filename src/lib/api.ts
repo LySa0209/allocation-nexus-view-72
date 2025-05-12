@@ -114,9 +114,9 @@ export async function fetchConsultantRanking(params: ConsultantRankingParams): P
   }
 }
 
-export async function addConsultantsToProject(consultantIds: string[], projectId: string): Promise<any> {
+export async function setConsultantsToProject(consultantIds: string[], projectId: string): Promise<any> {
   try {
-    const response = await fetch(`${API_URL}/add-consultants-to-project`, {
+    const response = await fetch(`${API_URL}/set-consultants-for-project`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
