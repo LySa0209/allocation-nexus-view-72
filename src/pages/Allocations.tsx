@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -6,6 +7,7 @@ import { ProjectNeedsList } from '@/components/Allocation/ProjectNeedsList';
 import { ProjectDetailPanel } from '@/components/Allocation/ProjectDetailPanel';
 import { ConsultantsList } from '@/components/Allocation/ConsultantsList';
 import { AllocatedConsultants } from '@/components/Allocation/AllocatedConsultants';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   consultants as mockConsultants,
   allocations as mockAllocations,
@@ -33,6 +35,7 @@ const Allocations: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectOrPipeline | null>(null);
   const [allocatedConsultants, setAllocatedConsultants] = useState<Consultant[]>([]);
   const [selectedConsultantIds, setSelectedConsultantIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("kpi");
   
   // Project detail sliders state
   const [fteValue, setFteValue] = useState(3);
@@ -142,6 +145,9 @@ const Allocations: React.FC = () => {
     setSeniorityMix(60); // Default to 60% senior
     setPriorityValue(2); // Default to medium priority
     
+    // Switch to the project details tab
+    setActiveTab("projects");
+    
     if (dataSource === 'api') {
       try {
         setIsLoading(true);
@@ -235,61 +241,73 @@ const Allocations: React.FC = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-[auto,1fr,1fr] gap-4 h-[calc(100vh-100px)]">
-
-          {/* KPI Bar */}
-          <AllocationKPI 
-            totalConsultants={consultants.length}
-            availableConsultants={benchedConsultants.length}
-            fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated}
-            partiallyAllocated={partiallyAllocated}
-          />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
+            <TabsTrigger value="kpi">KPI Dashboard</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="consultants">Consultants</TabsTrigger>
+            <TabsTrigger value="allocation">Allocation</TabsTrigger>
+          </TabsList>
           
-          {/* Top Left - Projects Needing Resources */}
-          <ProjectNeedsList 
-            projects={projects}
-            pipelineOpportunities={pipelineOpportunities}
-            onSelectProject={handleSelectProject}
-            selectedProjectId={selectedProject?.id || null}
-          />
-          
-          <div className="max-h-[calc(70vh-200px)]">
-            {/* fixed height that adapts to screen size */}
-          {/* Top Right - Project Details */}
-          <ProjectDetailPanel 
-            project={selectedProject}
-            fteValue={fteValue}
-            onFteChange={setFteValue}
-            seniorityValue={seniorityMix}
-            onSeniorityChange={setSeniorityMix}
-            priorityValue={priorityValue}
-            onPriorityChange={setPriorityValue}
-          />
-          </div>
-          
-          <div className="max-h-[calc(100vh-200px)]" ref={consultantsListRef}>
-          {/* Bottom Left - Available Consultants */}
-          <ConsultantsList 
-            consultants={consultants}
-            onAllocateConsultant={handleAllocateConsultant}
-            selectedConsultants={selectedConsultantIds}
-            selectedProjectId={selectedProject?.id || null}
-          />
-          </div>
-          
-          {/* Bottom Right - Allocated Consultants */}
-          <div ref={allocatedConsultantsRef}>
-            <AllocatedConsultants 
-              consultants={allocatedConsultants}
-              onRemoveConsultant={handleRemoveConsultant}
-              requiredFTEs={fteValue}
-              onConfirmAllocation={handleConfirmAllocation}
-              confirmLoading={confirmLoading}
+          {/* KPI Dashboard Tab */}
+          <TabsContent value="kpi" className="space-y-4">
+            <AllocationKPI 
+              totalConsultants={consultants.length}
+              availableConsultants={benchedConsultants.length}
+              fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated}
+              partiallyAllocated={partiallyAllocated}
             />
-          </div>
+          </TabsContent>
           
-        <div className="h-1" /> {/* Spacer below the last row */}
-        </div>
+          {/* Projects Tab */}
+          <TabsContent value="projects" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ProjectNeedsList 
+                projects={projects}
+                pipelineOpportunities={pipelineOpportunities}
+                onSelectProject={handleSelectProject}
+                selectedProjectId={selectedProject?.id || null}
+              />
+              
+              <ProjectDetailPanel 
+                project={selectedProject}
+                fteValue={fteValue}
+                onFteChange={setFteValue}
+                seniorityValue={seniorityMix}
+                onSeniorityChange={setSeniorityMix}
+                priorityValue={priorityValue}
+                onPriorityChange={setPriorityValue}
+              />
+            </div>
+          </TabsContent>
+          
+          {/* Consultants Tab */}
+          <TabsContent value="consultants" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div ref={consultantsListRef}>
+                <ConsultantsList 
+                  consultants={consultants}
+                  onAllocateConsultant={handleAllocateConsultant}
+                  selectedConsultants={selectedConsultantIds}
+                  selectedProjectId={selectedProject?.id || null}
+                />
+              </div>
+            </div>
+          </TabsContent>
+          
+          {/* Allocation Tab */}
+          <TabsContent value="allocation" className="space-y-4">
+            <div ref={allocatedConsultantsRef}>
+              <AllocatedConsultants 
+                consultants={allocatedConsultants}
+                onRemoveConsultant={handleRemoveConsultant}
+                requiredFTEs={fteValue}
+                onConfirmAllocation={handleConfirmAllocation}
+                confirmLoading={confirmLoading}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

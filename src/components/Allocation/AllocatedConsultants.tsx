@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, User, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ export const AllocatedConsultants = ({
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold">Allocated to Project</h3>
+        <h3 className="text-xl font-bold">Allocated to Project</h3>
         <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
           {consultants.length} allocated
         </span>
@@ -84,10 +85,6 @@ export const AllocatedConsultants = ({
                     </div>
                     
                   </div>
-                  {/* {consultant.score !== undefined && (
-                      <Badge className={`mt-1 w-fit ${scoreColor}`}>Score: {consultant.score}</Badge>
-                    )} */}
-                  
                 </div>
                 {/* Right: Remove button */}
                 <div className="flex items-center gap-6 ml-4 mr-4">
