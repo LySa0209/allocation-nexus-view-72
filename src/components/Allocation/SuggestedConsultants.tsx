@@ -93,7 +93,7 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
     <div className="bg-white rounded-lg shadow">
       <div className="p-4 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">
+          <h3 className="text-xl font-bold">
             {selectedProject 
               ? 'Suggested Consultants' 
               : 'Available Consultants'

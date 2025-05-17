@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Slider } from '@/components/ui/slider'; // Assuming this is a Shadcn/UI or similar slider
 import { ProjectOrPipeline, isProject } from '@/lib/types';
@@ -121,7 +122,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
   if (!project) {
     return (
       <div className="bg-white rounded-lg shadow p-4 h-full">
-        <h3 className="font-semibold mb-4">Project Details</h3>
+        <h3 className="text-xl font-bold mb-4">Project Details</h3>
         <p className="text-gray-500 text-center py-8">Select a project to view details</p>
       </div>
     );
@@ -129,7 +130,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
-      <h3 className="font-semibold mb-4">Project Details</h3>
+      <h3 className="text-xl font-bold mb-4">Project Details</h3>
 
       <div id="project-details"> {/* Keep id if used for e.g. e2e tests */}
         <div className="mb-4">

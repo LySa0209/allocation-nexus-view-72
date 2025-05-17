@@ -18,7 +18,7 @@ export const AllocationKPI = ({
     <div className="bg-white rounded-lg shadow p-4 col-span-2">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-lg">Resource Allocation Dashboard</h3>
+          <h3 className="text-xl font-bold">Resource Allocation Dashboard</h3>
           <p className="text-sm text-gray-500">Last updated: Just now</p>
         </div>
         <div className="flex space-x-6">

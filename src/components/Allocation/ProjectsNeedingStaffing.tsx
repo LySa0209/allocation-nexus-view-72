@@ -49,7 +49,7 @@ const ProjectsNeedingStaffing: React.FC<ProjectsNeedingStaffingProps> = ({
   if (allProjectsNeedingResources.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 text-center">
-        <h3 className="text-lg font-medium mb-4">Projects Needing Resources</h3>
+        <h3 className="text-xl font-bold mb-4">Projects Needing Resources</h3>
         <p className="text-gray-500">All projects are fully staffed</p>
       </div>
     );
@@ -59,7 +59,7 @@ const ProjectsNeedingStaffing: React.FC<ProjectsNeedingStaffingProps> = ({
     <div className="bg-white rounded-lg shadow">
       <div className="p-4 border-b border-gray-200">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Projects Needing Resources</h3>
+          <h3 className="text-xl font-bold">Projects Needing Resources</h3>
           <div className="flex space-x-2">
             <Button 
               variant="outline" 
