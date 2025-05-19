@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Slider } from '@/components/ui/slider'; // Assuming this is a Shadcn/UI or similar slider
 import { ProjectOrPipeline, isProject } from '@/lib/types';
@@ -13,20 +12,24 @@ const SECTOR_SPECIFIC_SKILLS: Record<string, string[]> = {
   'Technology': ['System Architecture', 'Cloud Computing', 'Data Engineering'],
   'Finance': ['Financial Analysis', 'Risk Management', 'Process Optimization'],
   'Operations': ['Supply Chain', 'Process Engineering', 'Operational Excellence'],
-  'HR': ['Talent Management', 'Organizational Design', 'Change Management'],
+  'HR': ['Talent Management', 'Organizational Design', 'Change Management']
 };
 const DEFAULT_SECTOR_SKILLS = ['Consulting', 'Business Analysis'];
-
-const PRIORITY_LABELS: { [key: number]: string } = {
+const PRIORITY_LABELS: {
+  [key: number]: string;
+} = {
   1: 'Low',
   2: 'Medium',
-  3: 'High',
+  3: 'High'
 };
-
-const PRIORITY_TEXT_COLORS: { [key: number]: string } = {
-  1: 'text-yellow-500', // Low
-  2: 'text-blue-500',   // Medium
-  3: 'text-red-500',    // High
+const PRIORITY_TEXT_COLORS: {
+  [key: number]: string;
+} = {
+  1: 'text-yellow-500',
+  // Low
+  2: 'text-blue-500',
+  // Medium
+  3: 'text-red-500' // High
 };
 
 // --- Helper function for skills (can be outside or memoized inside if preferred) ---
@@ -51,7 +54,6 @@ interface SliderControlProps {
   valueClassName?: string; // To pass dynamic classes for the value display
   sliderClassName?: string;
 }
-
 const SliderControl: React.FC<SliderControlProps> = ({
   label,
   value,
@@ -65,35 +67,22 @@ const SliderControl: React.FC<SliderControlProps> = ({
   centerLabel,
   rightLabel,
   valueClassName = 'text-gray-500',
-  sliderClassName = 'project-slider',
+  sliderClassName = 'project-slider'
 }) => {
-  const displayedValue = displayValueOverride !== undefined
-    ? displayValueOverride
-    : `${value}${displayValueSuffix}`;
-
-  return (
-    <div>
+  const displayedValue = displayValueOverride !== undefined ? displayValueOverride : `${value}${displayValueSuffix}`;
+  return <div>
       <div className="flex justify-between mb-1">
         <span className="text-sm font-medium">{label}</span>
         <span className={`text-sm ${valueClassName}`}>{displayedValue}</span>
       </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[value]} // Slider component likely expects an array
-        onValueChange={(val) => onValueChange(val[0])}
-        className={sliderClassName}
-      />
-      {(leftLabel || centerLabel || rightLabel) && (
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+      <Slider min={min} max={max} step={step} value={[value]} // Slider component likely expects an array
+    onValueChange={val => onValueChange(val[0])} className={sliderClassName} />
+      {(leftLabel || centerLabel || rightLabel) && <div className="flex justify-between text-xs text-gray-500 mt-1">
           <span>{leftLabel}</span>
           {centerLabel && <span>{centerLabel}</span>}
           <span>{rightLabel}</span>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
 
 // --- Main Project Detail Panel Props ---
@@ -107,7 +96,6 @@ interface ProjectDetailPanelProps {
   onPriorityChange: (value: number) => void;
   onContinue?: () => void; // New prop for the continue button
 }
-
 export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
   project,
   fteValue,
@@ -116,26 +104,21 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
   onSeniorityChange,
   priorityValue,
   onPriorityChange,
-  onContinue,
+  onContinue
 }) => {
   // Memoize projectSkills to recompute only when project.sector changes
   const projectSkills = React.useMemo(() => {
     if (!project) return [];
     return getProjectSkills(project.sector);
   }, [project]);
-
   if (!project) {
-    return (
-      <div className="bg-white rounded-lg shadow p-4 h-full">
+    return <div className="bg-white rounded-lg shadow p-4 h-full">
         <h3 className="text-xl font-bold mb-1">Project Details</h3>
         <p className="text-xs text-gray-500 mb-4">Edit details to specify resource requirements</p>
         <p className="text-gray-500 text-center py-8">Select a project to view details</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
+  return <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
       <h3 className="text-xl font-bold mb-1">Project Details</h3>
       <p className="text-xs text-gray-500 mb-4">Edit details to specify resource requirements</p>
 
@@ -152,66 +135,34 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
             <div className="mb-4">
               <p className="text-sm text-gray-700 mb-1">Project Description:</p>
               <p className="text-sm">
-                {isProject(project)
-                  ? `${project.clientName} project requiring ${project.resourcesNeeded} consultants.`
-                  : `Opportunity with ${project.clientName} at ${project.winPercentage}% likelihood.`}
+                {isProject(project) ? `${project.clientName} project requiring ${project.resourcesNeeded} consultants.` : `Opportunity with ${project.clientName} at ${project.winPercentage}% likelihood.`}
               </p>
             </div>
 
             <div className="space-y-6"> {/* Increased spacing a bit for clarity */}
-              <SliderControl
-                label="Required FTEs"
-                value={fteValue}
-                onValueChange={onFteChange}
-                min={1}
-                max={10}
-                step={1}
-              />
+              <SliderControl label="Required FTEs" value={fteValue} onValueChange={onFteChange} min={1} max={10} step={1} />
 
-              <SliderControl
-                label="Seniority Mix"
-                value={seniorityValue}
-                displayValueSuffix="% Senior"
-                onValueChange={onSeniorityChange}
-                min={0}
-                max={100}
-                step={5}
-                leftLabel="More Junior"
-                rightLabel="More Senior"
-              />
+              <SliderControl label="Seniority Mix" value={seniorityValue} displayValueSuffix="% Senior" onValueChange={onSeniorityChange} min={0} max={100} step={5} leftLabel="More Junior" rightLabel="More Senior" />
 
-              <SliderControl
-                label="Project Priority"
-                value={priorityValue}
-                displayValueOverride={PRIORITY_LABELS[priorityValue]}
-                valueClassName={PRIORITY_TEXT_COLORS[priorityValue]}
-                onValueChange={onPriorityChange}
-                min={1}
-                max={3}
-                step={1}
-                leftLabel={PRIORITY_LABELS[1]} // Low
-                centerLabel={PRIORITY_LABELS[2]} // Medium
-                rightLabel={PRIORITY_LABELS[3]} // High
-              />
+              <SliderControl label="Project Priority" value={priorityValue} displayValueOverride={PRIORITY_LABELS[priorityValue]} valueClassName={PRIORITY_TEXT_COLORS[priorityValue]} onValueChange={onPriorityChange} min={1} max={3} step={1} leftLabel={PRIORITY_LABELS[1]} // Low
+            centerLabel={PRIORITY_LABELS[2]} // Medium
+            rightLabel={PRIORITY_LABELS[3]} // High
+            />
 
               <div>
                 <p className="text-sm font-medium mb-2">Required Skills:</p>
                 <div className="flex flex-wrap gap-2">
-                  {projectSkills.map((skill) => ( // Use skill itself as key if unique, or index if not
-                    <span key={skill} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  {projectSkills.map(skill =>
+                // Use skill itself as key if unique, or index if not
+                <span key={skill} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                       {skill}
-                    </span>
-                  ))}
+                    </span>)}
                 </div>
               </div>
               
               {/* Continue Button */}
               <div className="flex justify-end mt-8">
-                <Button 
-                  onClick={onContinue} 
-                  className="flex items-center"
-                  disabled={!project}
-                >
+                <Button onClick={onContinue} disabled={!project} className="flex items-center text-[#ffe704]">
                   Continue to Consultants
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -220,6 +171,5 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
