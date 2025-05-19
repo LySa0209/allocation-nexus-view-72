@@ -1,14 +1,11 @@
-
 import React from 'react';
 import { Project, PipelineOpportunity, isProject } from '@/lib/types';
-
 interface ProjectNeedsListProps {
   projects: Project[];
   pipelineOpportunities: PipelineOpportunity[];
   onSelectProject: (project: Project | PipelineOpportunity) => void;
   selectedProjectId: string | null;
 }
-
 export const ProjectNeedsList = ({
   projects,
   pipelineOpportunities,
@@ -16,23 +13,13 @@ export const ProjectNeedsList = ({
   selectedProjectId
 }: ProjectNeedsListProps) => {
   // Filter to only include projects and opportunities that need resources
-  const confirmedProjectsNeedingResources = projects.filter(
-    project => project.staffingStatus === 'Needs Resources'
-  );
-  
-  const pipelineProjectsNeedingResources = pipelineOpportunities.filter(
-    pipeline => pipeline.resourcesNeeded > 0
-  );
-  
+  const confirmedProjectsNeedingResources = projects.filter(project => project.staffingStatus === 'Needs Resources');
+  const pipelineProjectsNeedingResources = pipelineOpportunities.filter(pipeline => pipeline.resourcesNeeded > 0);
+
   // Combine all projects needing resources
-  const projectsNeedingResources = [
-    ...confirmedProjectsNeedingResources,
-    ...pipelineProjectsNeedingResources
-  ];
-  
+  const projectsNeedingResources = [...confirmedProjectsNeedingResources, ...pipelineProjectsNeedingResources];
   const getPriorityBadge = (project: Project | PipelineOpportunity) => {
     const isPipeline = !isProject(project);
-    
     if (isPipeline) {
       const winPercent = (project as PipelineOpportunity).winPercentage;
       if (winPercent > 80) {
@@ -53,33 +40,18 @@ export const ProjectNeedsList = ({
       }
     }
   };
-  
-  return (
-    <div className="bg-white rounded-lg shadow p-4 overflow-y-auto h-full">
+  return <div className="bg-white rounded-lg shadow p-4 overflow-y-auto h-full">
       <h3 className="font-semibold mb-4 flex justify-between items-center">
-        <span>Projects Needing Resources</span>
+        <span className="text-xl text-black font-bold">Projects Needing Resources</span>
         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
           {projectsNeedingResources.length} projects
         </span>
       </h3>
       
       <div className="space-y-2">
-        {projectsNeedingResources.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No projects need resources at this time</p>
-        ) : (
-          projectsNeedingResources.map(project => {
-            const resourcesNeeded = isProject(project)
-              ? project.resourcesNeeded - project.resourcesAssigned
-              : project.resourcesNeeded;
-              
-            return (
-              <div
-                key={project.id}
-                className={`project-item p-3 rounded-md cursor-pointer hover:bg-gray-50 ${
-                  selectedProjectId === project.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                }`}
-                onClick={() => onSelectProject(project)}
-              >
+        {projectsNeedingResources.length === 0 ? <p className="text-gray-500 text-center py-4">No projects need resources at this time</p> : projectsNeedingResources.map(project => {
+        const resourcesNeeded = isProject(project) ? project.resourcesNeeded - project.resourcesAssigned : project.resourcesNeeded;
+        return <div key={project.id} className={`project-item p-3 rounded-md cursor-pointer hover:bg-gray-50 ${selectedProjectId === project.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`} onClick={() => onSelectProject(project)}>
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">{project.name}</p>
@@ -89,11 +61,8 @@ export const ProjectNeedsList = ({
                   </div>
                   {getPriorityBadge(project)}
                 </div>
-              </div>
-            );
-          })
-        )}
+              </div>;
+      })}
       </div>
-    </div>
-  );
+    </div>;
 };
