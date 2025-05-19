@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Consultant } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 
-// Extend Consultant type for local use to allow score property
+// Extend Consultant type for local use to allow score and flag properties
 interface AllocatedConsultant extends Consultant {
   score?: number;
   flag?: string;
@@ -39,7 +39,7 @@ export const AllocatedConsultants = ({
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">Allocated to Project</h3>
+        <h3 className="text-2xl font-bold">Allocated to Project</h3>
         <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
           {consultants.length} allocated
         </span>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '../components/Layout/Navbar';
@@ -35,7 +34,7 @@ const Allocations: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectOrPipeline | null>(null);
   const [allocatedConsultants, setAllocatedConsultants] = useState<Consultant[]>([]);
   const [selectedConsultantIds, setSelectedConsultantIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState("kpi");
+  const [activeTab, setActiveTab] = useState("projects");
   
   // Project detail sliders state
   const [fteValue, setFteValue] = useState(3);
@@ -242,25 +241,20 @@ const Allocations: React.FC = () => {
       
       <main className="container mx-auto px-4 py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="kpi">KPI Dashboard</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="consultants">Consultants</TabsTrigger>
             <TabsTrigger value="allocation">Allocation</TabsTrigger>
           </TabsList>
           
-          {/* KPI Dashboard Tab */}
-          <TabsContent value="kpi" className="space-y-4">
+          {/* Projects Tab (Merged with KPI) */}
+          <TabsContent value="projects" className="space-y-4">
             <AllocationKPI 
               totalConsultants={consultants.length}
               availableConsultants={benchedConsultants.length}
               fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated}
               partiallyAllocated={partiallyAllocated}
             />
-          </TabsContent>
-          
-          {/* Projects Tab */}
-          <TabsContent value="projects" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProjectNeedsList 
                 projects={projects}
