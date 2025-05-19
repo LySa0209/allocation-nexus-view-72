@@ -3,6 +3,8 @@ import React from 'react';
 import { Slider } from '@/components/ui/slider'; // Assuming this is a Shadcn/UI or similar slider
 import { ProjectOrPipeline, isProject } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronRight } from 'lucide-react';
 
 // --- Constants defined outside the component ---
 const BASE_SKILLS = ['Project Management', 'Client Management'];
@@ -103,6 +105,7 @@ interface ProjectDetailPanelProps {
   onSeniorityChange: (value: number) => void;
   priorityValue: number; // Assuming 1 for Low, 2 for Medium, 3 for High
   onPriorityChange: (value: number) => void;
+  onContinue?: () => void; // New prop for the continue button
 }
 
 export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
@@ -113,6 +116,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
   onSeniorityChange,
   priorityValue,
   onPriorityChange,
+  onContinue,
 }) => {
   // Memoize projectSkills to recompute only when project.sector changes
   const projectSkills = React.useMemo(() => {
@@ -199,6 +203,18 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
                     </span>
                   ))}
                 </div>
+              </div>
+              
+              {/* Continue Button */}
+              <div className="flex justify-end mt-8">
+                <Button 
+                  onClick={onContinue} 
+                  className="flex items-center"
+                  disabled={!project}
+                >
+                  Continue to Consultants
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>

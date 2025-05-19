@@ -172,6 +172,12 @@ const Allocations: React.FC = () => {
     }
   };
 
+  // Handle continue to consultants tab
+  const handleContinueToConsultants = () => {
+    // Switch to the consultants tab when continue button is clicked
+    setActiveTab("consultants");
+  };
+
   // Get consultants allocated to a specific project
   const getConsultantsForProject = (projectId: string): Consultant[] => {
     const projectAllocations = allocations.filter(a => a.projectId === projectId);
@@ -271,6 +277,7 @@ const Allocations: React.FC = () => {
                 onSeniorityChange={setSeniorityMix}
                 priorityValue={priorityValue}
                 onPriorityChange={setPriorityValue}
+                onContinue={handleContinueToConsultants}
               />
             </div>
           </TabsContent>
