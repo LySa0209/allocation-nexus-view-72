@@ -162,7 +162,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
               
               {/* Continue Button */}
               <div className="flex justify-end mt-8">
-                <Button onClick={onContinue} disabled={!project} className="flex items-center text-[#ffe704] bg-[transparent#ffe704] bg-[#ffe704]">
+                <Button onClick={onContinue} disabled={!project} className="flex items-center bg-[transparent#ffe704] bg-[#ffe704] text-[#0f161e]">
                   Continue to Consultants
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
