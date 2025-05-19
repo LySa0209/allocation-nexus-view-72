@@ -130,7 +130,8 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full overflow-y-auto">
-      <h3 className="text-xl font-bold mb-4">Project Details</h3>
+      <h3 className="text-xl font-bold mb-1">Project Details</h3>
+      <p className="text-xs text-gray-500 mb-4">Edit details to specify resource requirements</p>
 
       <div id="project-details"> {/* Keep id if used for e.g. e2e tests */}
         <div className="mb-4">
