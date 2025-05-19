@@ -2,6 +2,7 @@
 import React from 'react';
 import { Slider } from '@/components/ui/slider'; // Assuming this is a Shadcn/UI or similar slider
 import { ProjectOrPipeline, isProject } from '@/lib/types';
+import { Card, CardContent } from '@/components/ui/card';
 
 // --- Constants defined outside the component ---
 const BASE_SKILLS = ['Project Management', 'Client Management'];
@@ -122,7 +123,8 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
   if (!project) {
     return (
       <div className="bg-white rounded-lg shadow p-4 h-full">
-        <h3 className="text-xl font-bold mb-4">Project Details</h3>
+        <h3 className="text-xl font-bold mb-1">Project Details</h3>
+        <p className="text-xs text-gray-500 mb-4">Edit details to specify resource requirements</p>
         <p className="text-gray-500 text-center py-8">Select a project to view details</p>
       </div>
     );
@@ -133,71 +135,75 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
       <h3 className="text-xl font-bold mb-1">Project Details</h3>
       <p className="text-xs text-gray-500 mb-4">Edit details to specify resource requirements</p>
 
-      <div id="project-details"> {/* Keep id if used for e.g. e2e tests */}
-        <div className="mb-4">
-          <h4 className="text-lg font-medium">{project.name}</h4>
-          <p className="text-sm text-gray-500">
-            {project.sector || 'General'} • Start Date: {new Date(project.startDate).toLocaleDateString()}
-          </p>
-        </div>
+      <Card className="border border-gray-200">
+        <CardContent className="pt-4">
+          <div id="project-details"> {/* Keep id if used for e.g. e2e tests */}
+            <div className="mb-4">
+              <h4 className="text-lg font-medium">{project.name}</h4>
+              <p className="text-sm text-gray-500">
+                {project.sector || 'General'} • Start Date: {new Date(project.startDate).toLocaleDateString()}
+              </p>
+            </div>
 
-        <div className="mb-4">
-          <p className="text-sm text-gray-700 mb-1">Project Description:</p>
-          <p className="text-sm">
-            {isProject(project)
-              ? `${project.clientName} project requiring ${project.resourcesNeeded} consultants.`
-              : `Opportunity with ${project.clientName} at ${project.winPercentage}% likelihood.`}
-          </p>
-        </div>
+            <div className="mb-4">
+              <p className="text-sm text-gray-700 mb-1">Project Description:</p>
+              <p className="text-sm">
+                {isProject(project)
+                  ? `${project.clientName} project requiring ${project.resourcesNeeded} consultants.`
+                  : `Opportunity with ${project.clientName} at ${project.winPercentage}% likelihood.`}
+              </p>
+            </div>
 
-        <div className="space-y-6"> {/* Increased spacing a bit for clarity */}
-          <SliderControl
-            label="Required FTEs"
-            value={fteValue}
-            onValueChange={onFteChange}
-            min={1}
-            max={10}
-            step={1}
-          />
+            <div className="space-y-6"> {/* Increased spacing a bit for clarity */}
+              <SliderControl
+                label="Required FTEs"
+                value={fteValue}
+                onValueChange={onFteChange}
+                min={1}
+                max={10}
+                step={1}
+              />
 
-          <SliderControl
-            label="Seniority Mix"
-            value={seniorityValue}
-            displayValueSuffix="% Senior"
-            onValueChange={onSeniorityChange}
-            min={0}
-            max={100}
-            step={5}
-            leftLabel="More Junior"
-            rightLabel="More Senior"
-          />
+              <SliderControl
+                label="Seniority Mix"
+                value={seniorityValue}
+                displayValueSuffix="% Senior"
+                onValueChange={onSeniorityChange}
+                min={0}
+                max={100}
+                step={5}
+                leftLabel="More Junior"
+                rightLabel="More Senior"
+              />
 
-          <SliderControl
-            label="Project Priority"
-            value={priorityValue}
-            displayValueOverride={PRIORITY_LABELS[priorityValue]}
-            valueClassName={PRIORITY_TEXT_COLORS[priorityValue]}
-            onValueChange={onPriorityChange}
-            min={1}
-            max={3}
-            step={1}
-            leftLabel={PRIORITY_LABELS[1]} // Low
-            centerLabel={PRIORITY_LABELS[2]} // Medium
-            rightLabel={PRIORITY_LABELS[3]} // High
-          />
+              <SliderControl
+                label="Project Priority"
+                value={priorityValue}
+                displayValueOverride={PRIORITY_LABELS[priorityValue]}
+                valueClassName={PRIORITY_TEXT_COLORS[priorityValue]}
+                onValueChange={onPriorityChange}
+                min={1}
+                max={3}
+                step={1}
+                leftLabel={PRIORITY_LABELS[1]} // Low
+                centerLabel={PRIORITY_LABELS[2]} // Medium
+                rightLabel={PRIORITY_LABELS[3]} // High
+              />
 
-          <div>
-            <p className="text-sm font-medium mb-2">Required Skills:</p>
-            <div className="flex flex-wrap gap-2">
-              {projectSkills.map((skill) => ( // Use skill itself as key if unique, or index if not
-                <span key={skill} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                  {skill}
-                </span>
-              ))}
+              <div>
+                <p className="text-sm font-medium mb-2">Required Skills:</p>
+                <div className="flex flex-wrap gap-2">
+                  {projectSkills.map((skill) => ( // Use skill itself as key if unique, or index if not
+                    <span key={skill} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
