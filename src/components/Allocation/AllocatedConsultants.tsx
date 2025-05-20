@@ -95,7 +95,7 @@ export const AllocatedConsultants = ({
           <span className="text-sm font-bold">{requiredFTEs}.0</span>
         </div>
 
-        <Button disabled={consultants.length === 0 || confirmLoading} onClick={onConfirmAllocation} className="mt-4 w-full text-base text-neutral-950">
+        <Button className="mt-4 w-full" disabled={consultants.length === 0 || confirmLoading} onClick={onConfirmAllocation}>
           {confirmLoading ? 'Allocating...' : 'Confirm Allocation'}
         </Button>
       </div>
