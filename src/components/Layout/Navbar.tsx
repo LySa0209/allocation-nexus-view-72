@@ -11,9 +11,9 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <div className="flex items-center bg-[#ffe704] rounded-md border flex items-center gap-2 py-[3px] px-[5px]">
+              <div className="flex items-center rounded-md border flex items-center gap-2 py-[3px] px-[5px] bg-zinc-300">
                 <img src="/lovable-uploads/04ccee57-3568-4ad0-994a-e5a546547e96.png" alt="EY Logo" className="h-8 mr-2" />
-                <span className="text-xl text-[#0f161e] font-extrabold">Allocation Nexus</span>
+                <span className="text-xl font-extrabold text-[#0f161e]">Allocation Nexus</span>
               </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
