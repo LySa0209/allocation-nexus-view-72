@@ -1,17 +1,27 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Briefcase, List } from 'lucide-react';
+
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+  
   return <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-xl text-[#0f161e] bg-[#ffe704] px-4 py-2 rounded-md border font-extrabold">EY Allocation Nexus</span>
+              <div className="flex items-center bg-[#ffe704] px-4 py-2 rounded-md border">
+                <img 
+                  src="/lovable-uploads/04ccee57-3568-4ad0-994a-e5a546547e96.png" 
+                  alt="EY Logo" 
+                  className="h-8 mr-2" 
+                />
+                <span className="text-xl text-[#0f161e] font-extrabold">Allocation Nexus</span>
+              </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link to="/" className={`${isActive('/') ? 'border-primary2 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}>
@@ -62,4 +72,5 @@ const Navbar: React.FC = () => {
       </div>
     </nav>;
 };
+
 export default Navbar;
