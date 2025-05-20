@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, User, Star, X, Check, MapPin } from 'lucide-react';
 import { Consultant } from '@/lib/types';
@@ -15,6 +16,12 @@ interface ConsultantsListProps {
   selectedProjectId: string | number | null;
 }
 
+interface RankingItem {
+  id: string | number;
+  score: number;
+  flag?: string;
+}
+
 type SeniorityFilter = 'all' | 'Senior Manager' | 'Senior Consultant' | 'Consultant' | 'Manager' | 'Partner';
 type TeamStructure = 'lean' | 'balanced' | 'expert';
 
@@ -29,7 +36,7 @@ export const ConsultantsList = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [seniorityFilter, setSeniorityFilter] = useState<SeniorityFilter>('all');
   const [teamStructure, setTeamStructure] = useState<TeamStructure>('balanced');
-  const [rankedConsultants, setRankedConsultants] = useState<Consultant[]>([]);
+  const [rankedConsultants, setRankedConsultants] = useState<(Consultant & { score: number; flag?: string })[]>([]);
   const [rankingResult, setRankingResult] = useState<any>(null);
 
   // Fetch ranked consultants when project or team structure changes
@@ -53,15 +60,19 @@ export const ConsultantsList = ({
         console.log('Ranking result:', rankingResult);
         
         // Map the returned IDs to actual consultant objects and add score
-        const rankedConsultantsList = (rankingResult.ranking as { id: string | number, score: number }[])
+        const rankedConsultantsList = (rankingResult.ranking as RankingItem[])
           .map((r) => {
             const consultant = consultants.find(c => c.id == r.id);
             if (consultant) {
-              return { ...consultant, score: (r.score+3)*10, flag: r.flag };
+              return { 
+                ...consultant, 
+                score: (r.score+3)*10, 
+                flag: r.flag 
+              };
             }
             return undefined;
           })
-          .filter(Boolean) as (Consultant & { score: number })[];
+          .filter(Boolean) as (Consultant & { score: number; flag?: string })[];
           
         console.log('Ranked consultants:', rankedConsultantsList);
         setRankedConsultants(rankedConsultantsList);
@@ -91,7 +102,7 @@ export const ConsultantsList = ({
   }, [selectedProjectId, teamStructure, dataSource, consultants, setIsLoading, toast]);
 
   // Determine which consultants to display
-  const displayConsultants: (Consultant & { score?: number })[] = rankedConsultants.length > 0 
+  const displayConsultants: (Consultant & { score?: number; flag?: string })[] = rankedConsultants.length > 0 
     ? rankedConsultants 
     : consultants.map(c => ({ ...c, score: 0 }));
 

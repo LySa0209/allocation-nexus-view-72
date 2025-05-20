@@ -175,7 +175,7 @@ const Allocations: React.FC = () => {
   // Handle continue to consultants tab
   const handleContinueToConsultants = () => {
     // Switch to the consultants tab when continue button is clicked
-    setActiveTab("consultants");
+    setActiveTab("consultants_allocation");
   };
 
   // Get consultants allocated to a specific project
@@ -247,10 +247,9 @@ const Allocations: React.FC = () => {
       
       <main className="container mx-auto px-4 py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="consultants">Consultants</TabsTrigger>
-            <TabsTrigger value="allocation">Allocation</TabsTrigger>
+            <TabsTrigger value="consultants_allocation">Consultants & Allocation</TabsTrigger>
           </TabsList>
           
           {/* Projects Tab (Merged with KPI) */}
@@ -282,8 +281,8 @@ const Allocations: React.FC = () => {
             </div>
           </TabsContent>
           
-          {/* Consultants Tab */}
-          <TabsContent value="consultants" className="space-y-4">
+          {/* Combined Consultants & Allocation Tab */}
+          <TabsContent value="consultants_allocation" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div ref={consultantsListRef}>
                 <ConsultantsList 
@@ -293,19 +292,16 @@ const Allocations: React.FC = () => {
                   selectedProjectId={selectedProject?.id || null}
                 />
               </div>
-            </div>
-          </TabsContent>
-          
-          {/* Allocation Tab */}
-          <TabsContent value="allocation" className="space-y-4">
-            <div ref={allocatedConsultantsRef}>
-              <AllocatedConsultants 
-                consultants={allocatedConsultants}
-                onRemoveConsultant={handleRemoveConsultant}
-                requiredFTEs={fteValue}
-                onConfirmAllocation={handleConfirmAllocation}
-                confirmLoading={confirmLoading}
-              />
+              
+              <div ref={allocatedConsultantsRef}>
+                <AllocatedConsultants 
+                  consultants={allocatedConsultants}
+                  onRemoveConsultant={handleRemoveConsultant}
+                  requiredFTEs={fteValue}
+                  onConfirmAllocation={handleConfirmAllocation}
+                  confirmLoading={confirmLoading}
+                />
+              </div>
             </div>
           </TabsContent>
         </Tabs>
