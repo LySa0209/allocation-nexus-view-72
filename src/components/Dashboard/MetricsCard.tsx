@@ -1,4 +1,3 @@
-
 import React from 'react';
 interface MetricsCardProps {
   title: string;
@@ -26,8 +25,10 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
           <h3 className="font-bold mt-1 text-2xl">{value}</h3>
           {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
         </div>
-        <div className="p-2 rounded-full bg-gray-200">
-          {React.cloneElement(icon as React.ReactElement, { className: 'h-5 w-5 text-primary2' })}
+        <div className="p-2 rounded-full bg-zinc-500">
+          {React.cloneElement(icon as React.ReactElement, {
+          className: 'h-5 w-5 text-primary2'
+        })}
         </div>
       </div>
       
