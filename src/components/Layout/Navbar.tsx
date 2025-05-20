@@ -7,11 +7,11 @@ const Navbar: React.FC = () => {
     return location.pathname === path;
   };
   return <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 bg-zinc-400">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <div className="<div class=\"flex items-center gap-2 py-[3px] px-[5px] bg-zinc-400 rounded-none border-0\">\n">
+              <div className="flex items-center rounded-md border flex items-center gap-2 py-[3px] px-[5px] bg-zinc-300">
                 <img src="/lovable-uploads/04ccee57-3568-4ad0-994a-e5a546547e96.png" alt="EY Logo" className="h-8 mr-2" />
                 <span className="text-xl font-extrabold text-[#0f161e]">Allocation Nexus</span>
               </div>
