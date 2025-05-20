@@ -25,7 +25,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
           <h3 className="text-2xl font-bold mt-1">{value}</h3>
           {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
         </div>
-        <div className="p-2 rounded-full bg-gray-950">{icon}</div>
+        <div className="p-2 rounded-full bg-gray-300">{icon}</div>
       </div>
       
       {trend && <div className="mt-2">
