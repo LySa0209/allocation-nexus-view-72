@@ -1,25 +1,18 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Briefcase, List } from 'lucide-react';
-
 const Navbar: React.FC = () => {
   const location = useLocation();
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-  
   return <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <div className="flex items-center bg-[#ffe704] px-4 py-2 rounded-md border">
-                <img 
-                  src="/lovable-uploads/04ccee57-3568-4ad0-994a-e5a546547e96.png" 
-                  alt="EY Logo" 
-                  className="h-8 mr-2" 
-                />
+              <div className="flex items-center bg-[#ffe704] rounded-md border flex items-center gap-2 py-[3px] px-[5px]">
+                <img src="/lovable-uploads/04ccee57-3568-4ad0-994a-e5a546547e96.png" alt="EY Logo" className="h-8 mr-2" />
                 <span className="text-xl text-[#0f161e] font-extrabold">Allocation Nexus</span>
               </div>
             </div>
@@ -72,5 +65,4 @@ const Navbar: React.FC = () => {
       </div>
     </nav>;
 };
-
 export default Navbar;
