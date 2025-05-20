@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 260 75% 75%;
+    --primary: 55 100% 50%; /* Yellow: hue 55, saturation 100%, lightness 50% */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 260 50% 55%;
+    --secondary: 213 38% 9%; /* Black #0f161e: hue 213, saturation 38%, lightness 9% */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 260 40% 96.1%;
+    --accent: 55 100% 95%; /* Light yellow accent */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 260 75% 75%;
+    --ring: 55 100% 50%; /* Yellow ring */
 
     --radius: 0.5rem;
 
@@ -55,10 +55,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 260 75% 75%;
+    --primary: 55 100% 50%; /* Yellow */
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 213 38% 9%; /* Dark black */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;

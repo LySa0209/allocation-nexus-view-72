@@ -294,6 +294,11 @@ const Allocations: React.FC = () => {
               </div>
               
               <div ref={allocatedConsultantsRef}>
+                {/* Add a custom div with the allocated consultants title and guidance text */}
+                <div className="bg-white rounded-lg shadow p-4 mb-4">
+                  <h3 className="font-semibold mb-1">Allocated to Project</h3>
+                  <p className="text-sm text-gray-500">Consultants added to this project</p>
+                </div>
                 <AllocatedConsultants 
                   consultants={allocatedConsultants}
                   onRemoveConsultant={handleRemoveConsultant}

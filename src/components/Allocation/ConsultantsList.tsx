@@ -143,7 +143,7 @@ export const ConsultantsList = ({
 
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full relative">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="font-semibold inline-block">Available Consultants</h3>
         <ToggleGroup 
           type="single" 
@@ -156,6 +156,10 @@ export const ConsultantsList = ({
           <ToggleGroupItem value="expert" className="px-3 py-1 text-sm">Expert</ToggleGroupItem>
         </ToggleGroup>
       </div>
+
+      {/* Added guidance text */}
+      <p className="text-sm text-gray-500 mb-4">Click on allocate to add consultant to the team</p>
+
       {/* Team structure summary below title */}
       {selectedProjectId && (
         <div className="mb-4">

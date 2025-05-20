@@ -67,8 +67,8 @@ export default {
 				allocated: "#10b981", // Green for allocated
 				bench: "#f97316", // Orange for on bench
 				needed: "#ef4444", // Red for resources needed
-				primary2: "#9b87f5", // Primary purple 
-				secondary2: "#7E69AB", // Secondary purple
+				primary2: "#ffe704", // Yellow (was primary purple)
+				secondary2: "#0f161e", // Black (was secondary purple)
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
