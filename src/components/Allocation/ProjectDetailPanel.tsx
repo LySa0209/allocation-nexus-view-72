@@ -133,7 +133,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
             </div>
 
             <div className="mb-4">
-              <p className="text-sm text-gray-700 mb-1">Project Description:</p>
+              <p className="text-gray-700 mb-1 text-sm font-bold">Project Description:</p>
               <p className="text-sm">
                 {isProject(project) ? `${project.clientName} project requiring ${project.resourcesNeeded} consultants.` : `Opportunity with ${project.clientName} at ${project.winPercentage}% likelihood.`}
               </p>
