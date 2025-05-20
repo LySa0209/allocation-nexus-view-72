@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Project, PipelineOpportunity, isProject } from '@/lib/types';
 interface ProjectNeedsListProps {
@@ -44,7 +43,7 @@ export const ProjectNeedsList = ({
   return <div className="bg-white rounded-lg shadow p-4 overflow-y-auto h-full">
       <h3 className="font-semibold mb-1 flex justify-between items-center">
         <span className="text-xl text-black font-bold">Projects Needing Resources</span>
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+        <span className="text-xs bg-[#ffe704] text-[#0f161e] px-2 py-1 rounded-full font-normal">
           {projectsNeedingResources.length} projects
         </span>
       </h3>
