@@ -22,7 +22,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-500">{title}</p>
-          <h3 className="text-2xl font-bold mt-1">{value}</h3>
+          <h3 className="font-bold mt-1 text-2xl">{value}</h3>
           {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
         </div>
         <div className="p-2 rounded-full bg-gray-400">{icon}</div>
