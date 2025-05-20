@@ -154,7 +154,7 @@ export const ProjectDetailPanel: React.FC<ProjectDetailPanelProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {projectSkills.map(skill =>
                 // Use skill itself as key if unique, or index if not
-                <span key={skill} className="text-xs bg-[#0f161e]/80 px-2 py-1 rounded-full text-[#ffe704]\\n">
+                <span key={skill} className="text-xs bg-[#0f161e]/80 px-2 py-1 rounded-full text-[#ffe704]">
                       {skill}
                     </span>)}
                 </div>
