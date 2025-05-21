@@ -224,10 +224,12 @@ export const ConsultantsList = ({
                         : 'hover:bg-gray-50 hover:shadow-sm'
                     }`}
                   >
-                    {/* Left Section - Consultant Info */}
+                    {/* Left Section - Consultant Info - Fixed alignment */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-3">
-                        <User className={`h-5 w-5 ${consultant.flag === 'core' ? 'text-purple-500' : 'text-gray-400'}`} />
+                        <div className="w-5 h-5 flex-shrink-0">
+                          <User className={`h-5 w-5 ${consultant.flag === 'core' ? 'text-purple-500' : 'text-gray-400'}`} />
+                        </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 truncate flex items-center">
                             {consultant.name}
