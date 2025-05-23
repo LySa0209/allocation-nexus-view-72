@@ -152,6 +152,20 @@ const Consultants: React.FC = () => {
     });
   };
   
+  const handleDeleteConsultant = (id: string) => {
+    const updatedConsultants = localConsultants.filter(c => c.id !== id);
+    setLocalConsultants(updatedConsultants);
+    
+    // Also remove any allocations for this consultant
+    const updatedAllocations = localAllocations.filter(a => a.consultantId !== id);
+    setLocalAllocations(updatedAllocations);
+    
+    toast({
+      title: "Consultant Deleted",
+      description: "The consultant has been successfully deleted.",
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -179,7 +193,10 @@ const Consultants: React.FC = () => {
                 Add Consultant
               </Button>
             </div>
-            <ConsultantList consultants={localConsultants} />
+            <ConsultantList 
+              consultants={localConsultants} 
+              onDeleteConsultant={handleDeleteConsultant}
+            />
           </>
         )}
       </main>

@@ -205,6 +205,26 @@ const Projects: React.FC = () => {
     });
   };
   
+  const handleDeleteProject = (id: string) => {
+    const updatedProjects = localProjects.filter(p => p.id !== id);
+    setLocalProjects(updatedProjects);
+    
+    toast({
+      title: "Project Deleted",
+      description: "The project has been successfully deleted.",
+    });
+  };
+  
+  const handleDeleteOpportunity = (id: string) => {
+    const updatedOpportunities = localPipelineOpportunities.filter(o => o.id !== id);
+    setLocalPipelineOpportunities(updatedOpportunities);
+    
+    toast({
+      title: "Opportunity Deleted",
+      description: "The pipeline opportunity has been successfully deleted.",
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -230,6 +250,8 @@ const Projects: React.FC = () => {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               onAddNew={() => setShowAddProjectModal(true)}
+              onDeleteProject={handleDeleteProject}
+              onDeleteOpportunity={handleDeleteOpportunity}
             />
           </>
         )}

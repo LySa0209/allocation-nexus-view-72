@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Consultant } from '../../lib/types';
 
 interface ConsultantListProps {
   consultants: Consultant[];
+  onDeleteConsultant?: (id: string) => void;
 }
 
-const ConsultantList: React.FC<ConsultantListProps> = ({ consultants }) => {
+const ConsultantList: React.FC<ConsultantListProps> = ({ consultants, onDeleteConsultant }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('All');
@@ -40,6 +42,13 @@ const ConsultantList: React.FC<ConsultantListProps> = ({ consultants }) => {
   
   const handleRowClick = (id: string) => {
     navigate(`/consultants/${id}`);
+  };
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent row click when deleting
+    if (onDeleteConsultant) {
+      onDeleteConsultant(id);
+    }
   };
   
   return (
@@ -110,12 +119,13 @@ const ConsultantList: React.FC<ConsultantListProps> = ({ consultants }) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expertise</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Project</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredConsultants.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                   No consultants found matching the criteria
                 </td>
               </tr>
@@ -154,6 +164,16 @@ const ConsultantList: React.FC<ConsultantListProps> = ({ consultants }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {consultant.currentProject || "—"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => handleDelete(e, consultant.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </td>
                 </tr>
               ))

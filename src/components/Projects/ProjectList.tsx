@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Filter, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Project, PipelineOpportunity } from '../../lib/types';
 
@@ -11,6 +11,8 @@ interface ProjectListProps {
   activeTab: 'active' | 'pipeline';
   onTabChange: (tab: 'active' | 'pipeline') => void;
   onAddNew: () => void;
+  onDeleteProject?: (id: string) => void;
+  onDeleteOpportunity?: (id: string) => void;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({ 
@@ -18,7 +20,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
   pipelineOpportunities, 
   activeTab,
   onTabChange,
-  onAddNew
+  onAddNew,
+  onDeleteProject,
+  onDeleteOpportunity
 }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +79,15 @@ const ProjectList: React.FC<ProjectListProps> = ({
   
   const handleRowClick = (id: string) => {
     navigate(`/projects/${id}?type=${activeTab}`);
+  };
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent row click when deleting
+    if (activeTab === 'active' && onDeleteProject) {
+      onDeleteProject(id);
+    } else if (activeTab === 'pipeline' && onDeleteOpportunity) {
+      onDeleteOpportunity(id);
+    }
   };
   
   return (
@@ -169,12 +182,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeline</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resources</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staffing</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProjects.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                     No projects found matching the criteria
                   </td>
                 </tr>
@@ -216,6 +230,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         {project.staffingStatus}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleDelete(e, project.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -234,12 +258,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Win %</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timeline</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resources Needed</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredOpportunities.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                     No opportunities found matching the criteria
                   </td>
                 </tr>
@@ -272,6 +297,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {opportunity.resourcesNeeded}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleDelete(e, opportunity.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </td>
                   </tr>
                 ))
