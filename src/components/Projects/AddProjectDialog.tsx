@@ -32,7 +32,6 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     clientName: '',
-    description: '',
     startDate: '',
     endDate: '',
     sector: '',
@@ -50,7 +49,6 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
       const project: Omit<Project, 'id'> = {
         name: formData.name,
         clientName: formData.clientName,
-        description: formData.description,
         startDate: formData.startDate,
         endDate: formData.endDate,
         sector: formData.sector,
@@ -64,7 +62,6 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
       const opportunity: Omit<PipelineOpportunity, 'id'> = {
         name: formData.name,
         clientName: formData.clientName,
-        description: formData.description,
         startDate: formData.startDate,
         endDate: formData.endDate,
         sector: formData.sector,
@@ -79,7 +76,6 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
     setFormData({
       name: '',
       clientName: '',
-      description: '',
       startDate: '',
       endDate: '',
       sector: '',
@@ -127,16 +123,6 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
               value={formData.clientName}
               onChange={(e) => handleInputChange('clientName', e.target.value)}
               required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
             />
           </div>
 

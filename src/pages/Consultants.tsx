@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import Navbar from '../components/Layout/Navbar';
 import ConsultantList from '../components/Consultants/ConsultantList';
 import ConsultantDetail from '../components/Consultants/ConsultantDetail';
+import AddConsultantDialog from '../components/Consultants/AddConsultantDialog';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
+import { Button } from '@/components/ui/button';
 import { 
   consultants as mockConsultants, 
   getConsultantById, 
@@ -22,6 +25,7 @@ const Consultants: React.FC = () => {
   const { dataSource, setIsLoading } = useDataSource();
   
   const [showMoveModal, setShowMoveModal] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [localConsultants, setLocalConsultants] = useState(mockConsultants);
   const [localAllocations, setLocalAllocations] = useState(mockAllocations);
   const [localProjects, setLocalProjects] = useState(mockProjects);
@@ -94,6 +98,20 @@ const Consultants: React.FC = () => {
     setShowMoveModal(true);
   };
   
+  const handleSaveConsultant = (consultantData: Omit<Consultant, 'id'>) => {
+    const newConsultant: Consultant = {
+      id: `C${String(localConsultants.length + 1).padStart(3, '0')}`,
+      ...consultantData
+    };
+    
+    setLocalConsultants([...localConsultants, newConsultant]);
+    
+    toast({
+      title: "Consultant Added",
+      description: `${newConsultant.name} has been successfully added to the system.`,
+    });
+  };
+  
   const handleConfirmMove = (data: {
     consultantId: string;
     projectId: string;
@@ -148,9 +166,18 @@ const Consultants: React.FC = () => {
           />
         ) : (
           <>
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Consultants</h1>
-              <p className="text-gray-500">Manage your consulting resources</p>
+            <div className="mb-6 flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Consultants</h1>
+                <p className="text-gray-500">Manage your consulting resources</p>
+              </div>
+              <Button 
+                onClick={() => setShowAddDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Consultant
+              </Button>
             </div>
             <ConsultantList consultants={localConsultants} />
           </>
@@ -168,6 +195,12 @@ const Consultants: React.FC = () => {
           preselectedConsultant={consultant}
         />
       )}
+      
+      <AddConsultantDialog
+        isOpen={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onSaveConsultant={handleSaveConsultant}
+      />
     </div>
   );
 };
