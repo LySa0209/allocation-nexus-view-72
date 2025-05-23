@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Project, PipelineOpportunity } from '../../lib/types';
 
 interface ProjectListProps {
@@ -9,13 +10,15 @@ interface ProjectListProps {
   pipelineOpportunities: PipelineOpportunity[];
   activeTab: 'active' | 'pipeline';
   onTabChange: (tab: 'active' | 'pipeline') => void;
+  onAddNew: () => void;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({ 
   projects, 
   pipelineOpportunities, 
   activeTab,
-  onTabChange
+  onTabChange,
+  onAddNew
 }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,32 +79,39 @@ const ProjectList: React.FC<ProjectListProps> = ({
   
   return (
     <div className="space-y-4">
-      {/* Tabs */}
+      {/* Tabs and Add Button */}
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => onTabChange('active')}
-            className={`
-              whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'active'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-            `}
-          >
-            Active Projects
-          </button>
-          <button
-            onClick={() => onTabChange('pipeline')}
-            className={`
-              whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm
-              ${activeTab === 'pipeline'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-            `}
-          >
-            Pipeline Opportunities
-          </button>
-        </nav>
+        <div className="flex justify-between items-center">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => onTabChange('active')}
+              className={`
+                whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm
+                ${activeTab === 'active'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+              `}
+            >
+              Active Projects
+            </button>
+            <button
+              onClick={() => onTabChange('pipeline')}
+              className={`
+                whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm
+                ${activeTab === 'pipeline'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+              `}
+            >
+              Pipeline Opportunities
+            </button>
+          </nav>
+          
+          <Button onClick={onAddNew} className="mb-4">
+            <Plus className="w-4 h-4 mr-2" />
+            New {activeTab === 'active' ? 'Project' : 'Opportunity'}
+          </Button>
+        </div>
       </div>
       
       {/* Search and Filter Bar */}

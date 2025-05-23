@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Layout/Navbar';
@@ -6,6 +5,7 @@ import ProjectList from '../components/Projects/ProjectList';
 import ProjectDetail from '../components/Projects/ProjectDetail';
 import MoveConsultantModal from '../components/Allocation/MoveConsultantModal';
 import EditProjectDialog from '../components/Projects/EditProjectDialog';
+import AddProjectDialog from '../components/Projects/AddProjectDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects } from '@/lib/api';
@@ -29,6 +29,7 @@ const Projects: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'active' | 'pipeline'>(type || 'active');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
   const [localConsultants, setLocalConsultants] = useState(mockConsultants);
   const [localAllocations, setLocalAllocations] = useState(mockAllocations);
   const [localProjects, setLocalProjects] = useState(mockProjects);
@@ -174,6 +175,36 @@ const Projects: React.FC = () => {
     });
   };
   
+  const handleAddProject = (newProject: Omit<Project, 'id'>) => {
+    const projectId = `P${String(localProjects.length + 1).padStart(3, '0')}`;
+    const project: Project = {
+      ...newProject,
+      id: projectId,
+    };
+    
+    setLocalProjects([...localProjects, project]);
+    
+    toast({
+      title: "Project Added",
+      description: "The new project has been successfully created.",
+    });
+  };
+  
+  const handleAddOpportunity = (newOpportunity: Omit<PipelineOpportunity, 'id'>) => {
+    const opportunityId = `O${String(localPipelineOpportunities.length + 1).padStart(3, '0')}`;
+    const opportunity: PipelineOpportunity = {
+      ...newOpportunity,
+      id: opportunityId,
+    };
+    
+    setLocalPipelineOpportunities([...localPipelineOpportunities, opportunity]);
+    
+    toast({
+      title: "Opportunity Added",
+      description: "The new pipeline opportunity has been successfully created.",
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -198,6 +229,7 @@ const Projects: React.FC = () => {
               pipelineOpportunities={localPipelineOpportunities} 
               activeTab={activeTab}
               onTabChange={setActiveTab}
+              onAddNew={() => setShowAddProjectModal(true)}
             />
           </>
         )}
@@ -221,6 +253,14 @@ const Projects: React.FC = () => {
           />
         </>
       )}
+      
+      <AddProjectDialog
+        isOpen={showAddProjectModal}
+        onClose={() => setShowAddProjectModal(false)}
+        onSaveProject={handleAddProject}
+        onSaveOpportunity={handleAddOpportunity}
+        type={activeTab}
+      />
     </div>
   );
 };
