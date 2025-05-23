@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -10,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Project, PipelineOpportunity } from '@/lib/types';
 
@@ -219,10 +217,10 @@ const AddProjectDialog: React.FC<AddProjectDialogProps> = ({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="text-black">
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="text-black">
               Create {type === 'active' ? 'Project' : 'Opportunity'}
             </Button>
           </DialogFooter>
