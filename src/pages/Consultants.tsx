@@ -217,6 +217,7 @@ const Consultants: React.FC = () => {
             projects={localProjects}
             onMoveConsultant={handleMoveConsultant}
             onDeleteAllocation={handleDeleteAllocation}
+            onDeleteConsultant={handleDeleteConsultant}
           />
         ) : (
           <>

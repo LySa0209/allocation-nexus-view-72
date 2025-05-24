@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,6 +8,17 @@ import {
   Consultant, Allocation, Project 
 } from '../../lib/types';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ConsultantDetailProps {
   consultant: Consultant;
@@ -16,6 +26,7 @@ interface ConsultantDetailProps {
   projects: Project[];
   onMoveConsultant: () => void;
   onDeleteAllocation?: (allocationId: string) => void;
+  onDeleteConsultant?: (consultantId: string) => void;
 }
 
 const ConsultantDetail: React.FC<ConsultantDetailProps> = ({ 
@@ -23,7 +34,8 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
   allocations, 
   projects,
   onMoveConsultant,
-  onDeleteAllocation
+  onDeleteAllocation,
+  onDeleteConsultant
 }) => {
   const navigate = useNavigate();
   
@@ -36,6 +48,13 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
       clientName: project ? project.clientName : 'Unknown Client'
     };
   });
+  
+  const handleDeleteConsultant = () => {
+    if (onDeleteConsultant) {
+      onDeleteConsultant(consultant.id);
+      navigate('/consultants');
+    }
+  };
   
   return (
     <div className="bg-white shadow rounded-lg">
@@ -52,12 +71,41 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
             Consultant Details
           </h3>
         </div>
-        <Button 
-          onClick={onMoveConsultant}
-          className="bg-primary hover:bg-primary/90 text-white"
-        >
-          Move to Project
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={onMoveConsultant}
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            Move to Project
+          </Button>
+          {onDeleteConsultant && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="flex items-center space-x-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete Consultant</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete {consultant.name}? This action cannot be undone and will remove all allocation history.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteConsultant}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
       
       {/* Consultant information */}

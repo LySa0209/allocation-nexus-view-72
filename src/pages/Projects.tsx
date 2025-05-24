@@ -282,6 +282,7 @@ const Projects: React.FC = () => {
             onAddConsultant={handleAddConsultant}
             onEditProject={() => setShowEditModal(true)}
             onRemoveConsultant={handleRemoveConsultant}
+            onDeleteProject={type === 'active' ? handleDeleteProject : handleDeleteOpportunity}
           />
         ) : (
           <>

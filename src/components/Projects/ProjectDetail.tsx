@@ -9,6 +9,17 @@ import {
   Project, PipelineOpportunity, Consultant 
 } from '../../lib/types';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectDetailProps {
   item: Project | PipelineOpportunity;
@@ -17,6 +28,7 @@ interface ProjectDetailProps {
   onAddConsultant: () => void;
   onEditProject?: () => void;
   onRemoveConsultant?: (consultantId: string) => void;
+  onDeleteProject?: (projectId: string) => void;
 }
 
 const ProjectDetail: React.FC<ProjectDetailProps> = ({ 
@@ -25,11 +37,19 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
   assignedConsultants = [],
   onAddConsultant,
   onEditProject,
-  onRemoveConsultant
+  onRemoveConsultant,
+  onDeleteProject
 }) => {
   const navigate = useNavigate();
   const project = type === 'active' ? item as Project : null;
   const opportunity = type === 'pipeline' ? item as PipelineOpportunity : null;
+  
+  const handleDeleteProject = () => {
+    if (onDeleteProject) {
+      onDeleteProject(item.id);
+      navigate('/projects');
+    }
+  };
   
   return (
     <div className="bg-white shadow rounded-lg">
@@ -65,6 +85,33 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
             >
               Add Consultant
             </Button>
+          )}
+          {onDeleteProject && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="flex items-center space-x-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete {type === 'active' ? 'Project' : 'Opportunity'}</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete {type === 'active' ? 'Project' : 'Opportunity'}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{item.name}"? This action cannot be undone and will remove all associated data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteProject}>
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>
