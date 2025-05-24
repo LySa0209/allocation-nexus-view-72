@@ -1,26 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Calendar, DollarSign, Building, Briefcase, 
-  Users, ArrowLeft, Clock, Edit, Trash2
-} from 'lucide-react';
-import { 
-  Project, PipelineOpportunity, Consultant 
-} from '../../lib/types';
+import { Calendar, DollarSign, Building, Briefcase, Users, ArrowLeft, Clock, Edit, Trash2 } from 'lucide-react';
+import { Project, PipelineOpportunity, Consultant } from '../../lib/types';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 interface ProjectDetailProps {
   item: Project | PipelineOpportunity;
   type: 'active' | 'pipeline';
@@ -30,9 +13,8 @@ interface ProjectDetailProps {
   onRemoveConsultant?: (consultantId: string) => void;
   onDeleteProject?: (projectId: string) => void;
 }
-
-const ProjectDetail: React.FC<ProjectDetailProps> = ({ 
-  item, 
+const ProjectDetail: React.FC<ProjectDetailProps> = ({
+  item,
   type,
   assignedConsultants = [],
   onAddConsultant,
@@ -43,23 +25,17 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
   const navigate = useNavigate();
   const project = type === 'active' ? item as Project : null;
   const opportunity = type === 'pipeline' ? item as PipelineOpportunity : null;
-  
   const handleDeleteProject = () => {
     if (onDeleteProject) {
       onDeleteProject(item.id);
       navigate('/projects');
     }
   };
-  
-  return (
-    <div className="bg-white shadow rounded-lg">
+  return <div className="bg-white shadow rounded-lg">
       {/* Header with back button */}
       <div className="border-b border-gray-200 px-4 py-4 sm:px-6 flex justify-between items-center">
         <div className="flex items-center">
-          <button 
-            onClick={() => navigate('/projects')}
-            className="mr-4 text-gray-400 hover:text-gray-500"
-          >
+          <button onClick={() => navigate('/projects')} className="mr-4 text-gray-400 hover:text-gray-500">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -67,32 +43,16 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
           </h3>
         </div>
         <div className="flex space-x-2">
-          {type === 'active' && onEditProject && (
-            <Button 
-              onClick={onEditProject}
-              variant="outline"
-              className="flex items-center space-x-1"
-            >
+          {type === 'active' && onEditProject && <Button onClick={onEditProject} variant="outline" className="flex items-center space-x-1">
               <Edit className="h-4 w-4" />
               <span>Edit</span>
-            </Button>
-          )}
-          {type === 'active' && (
-            <Button 
-              onClick={onAddConsultant}
-              className="bg-primary hover:bg-primary/90 text-white"
-              disabled={project?.staffingStatus === 'Fully Staffed'}
-            >
+            </Button>}
+          {type === 'active' && <Button onClick={onAddConsultant} className="bg-primary hover:bg-primary/90 text-white" disabled={project?.staffingStatus === 'Fully Staffed'}>
               Add Consultant
-            </Button>
-          )}
-          {onDeleteProject && (
-            <AlertDialog>
+            </Button>}
+          {onDeleteProject && <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  className="flex items-center space-x-1"
-                >
+                <Button variant="destructive" className="flex items-center space-x-1">
                   <Trash2 className="h-4 w-4" />
                   <span>Delete {type === 'active' ? 'Project' : 'Opportunity'}</span>
                 </Button>
@@ -111,8 +71,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>
-          )}
+            </AlertDialog>}
         </div>
       </div>
       
@@ -136,12 +95,10 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 <span className="text-sm text-gray-700">Client: {item.clientName}</span>
               </div>
               
-              {item.sector && (
-                <div className="flex items-center">
+              {item.sector && <div className="flex items-center">
                   <Building className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">Sector: {item.sector}</span>
-                </div>
-              )}
+                </div>}
               
               <div className="flex items-center">
                 <Calendar className="h-5 w-5 text-gray-400 mr-2" />
@@ -153,26 +110,20 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 <span className="text-sm text-gray-700">End: {new Date(item.endDate).toLocaleDateString()}</span>
               </div>
               
-              {type === 'active' && project?.budget && (
-                <div className="flex items-center">
+              {type === 'active' && project?.budget && <div className="flex items-center">
                   <DollarSign className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">Budget: ${project.budget.toLocaleString()}</span>
-                </div>
-              )}
+                </div>}
               
-              {type === 'pipeline' && opportunity?.estimatedValue && (
-                <div className="flex items-center">
+              {type === 'pipeline' && opportunity?.estimatedValue && <div className="flex items-center">
                   <DollarSign className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">Est. Value: ${opportunity.estimatedValue.toLocaleString()}</span>
-                </div>
-              )}
+                </div>}
               
-              {type === 'pipeline' && (
-                <div className="flex items-center">
+              {type === 'pipeline' && <div className="flex items-center">
                   <Clock className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">Win Probability: {opportunity?.winPercentage}%</span>
-                </div>
-              )}
+                </div>}
               
               <div className="flex items-center">
                 <Users className="h-5 w-5 text-gray-400 mr-2" />
@@ -181,58 +132,36 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 </span>
               </div>
               
-              {type === 'active' && (
-                <div className="flex items-center">
+              {type === 'active' && <div className="flex items-center">
                   <Users className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">
                     Resources Assigned: {project?.resourcesAssigned}
                   </span>
-                </div>
-              )}
+                </div>}
             </div>
             
-            {project?.deliverables && (
-              <div className="mt-4">
+            {project?.deliverables && <div className="mt-4">
                 <h4 className="text-sm font-medium text-gray-900 mb-1">Deliverables</h4>
                 <p className="text-sm text-gray-700">{project.deliverables}</p>
-              </div>
-            )}
+              </div>}
           </div>
           
           <div className="flex flex-col justify-between">
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-500 mb-2">Status</h4>
               <div className="flex items-center">
-                {type === 'active' ? (
-                  <>
-                    <span
-                      className={`status-badge ${
-                        project?.status === 'Active'
-                          ? 'status-allocated'
-                          : project?.status === 'On Hold'
-                          ? 'status-bench'
-                          : 'status-pipeline'
-                      } mr-2`}
-                    >
+                {type === 'active' ? <>
+                    <span className={`status-badge ${project?.status === 'Active' ? 'status-allocated' : project?.status === 'On Hold' ? 'status-bench' : 'status-pipeline'} mr-2`}>
                       {project?.status}
                     </span>
-                    <span
-                      className={`status-badge ml-2 ${
-                        project?.staffingStatus === 'Fully Staffed'
-                          ? 'status-allocated'
-                          : 'status-needed'
-                      }`}
-                    >
+                    <span className={`status-badge ml-2 ${project?.staffingStatus === 'Fully Staffed' ? 'status-allocated' : 'status-needed'}`}>
                       {project?.staffingStatus}
                     </span>
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     <span className="status-badge status-pipeline mr-2">
                       {opportunity?.status}
                     </span>
-                  </>
-                )}
+                  </>}
               </div>
             </div>
           </div>
@@ -240,19 +169,14 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
       </div>
       
       {/* Assigned Consultants (only for active projects) */}
-      {type === 'active' && (
-        <div className="px-4 py-5 sm:px-6 border-t border-gray-200">
+      {type === 'active' && <div className="px-4 py-5 sm:px-6 border-t border-gray-200">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
             Assigned Consultants
           </h3>
           
-          {assignedConsultants.length === 0 ? (
-            <p className="text-sm text-gray-500">No consultants currently assigned to this project.</p>
-          ) : (
-            <div className="overflow-hidden">
+          {assignedConsultants.length === 0 ? <p className="text-sm text-gray-500">No consultants currently assigned to this project.</p> : <div className="overflow-hidden">
               <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-                {assignedConsultants.map((consultant) => (
-                  <li key={consultant.id} className="px-4 py-4 flex items-center justify-between hover:bg-gray-50">
+                {assignedConsultants.map(consultant => <li key={consultant.id} className="px-4 py-4 flex items-center justify-between hover:bg-gray-50">
                     <div>
                       <p className="text-sm font-medium text-primary">{consultant.name}</p>
                       <p className="text-xs text-gray-500">{consultant.role}</p>
@@ -264,26 +188,12 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                           {consultant.serviceLine}
                         </span>
                       </div>
-                      {onRemoveConsultant && (
-                        <Button
-                          onClick={() => onRemoveConsultant(consultant.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      {onRemoveConsultant}
                     </div>
-                  </li>
-                ))}
+                  </li>)}
               </ul>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+            </div>}
+        </div>}
+    </div>;
 };
-
 export default ProjectDetail;
