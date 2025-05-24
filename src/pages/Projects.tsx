@@ -163,6 +163,50 @@ const Projects: React.FC = () => {
     });
   };
   
+  const handleRemoveConsultant = (consultantId: string) => {
+    if (!currentProject) return;
+    
+    // Find and remove the allocation
+    const allocation = localAllocations.find(a => 
+      a.consultantId === consultantId && a.projectId === currentProject.id
+    );
+    
+    if (!allocation) return;
+    
+    const updatedAllocations = localAllocations.filter(a => a.id !== allocation.id);
+    setLocalAllocations(updatedAllocations);
+    
+    // Update consultant status if they have no more allocations
+    const remainingAllocations = updatedAllocations.filter(a => a.consultantId === consultantId);
+    if (remainingAllocations.length === 0) {
+      const updatedConsultants = localConsultants.map(c => 
+        c.id === consultantId ? {
+          ...c,
+          status: 'Benched' as const,
+          currentProject: undefined
+        } : c
+      );
+      setLocalConsultants(updatedConsultants);
+    }
+    
+    // Update project resources
+    const updatedProjects = localProjects.map(p => 
+      p.id === currentProject.id ? {
+        ...p,
+        resourcesAssigned: Math.max(0, p.resourcesAssigned - 1),
+        staffingStatus: p.resourcesAssigned - 1 < p.resourcesNeeded 
+          ? 'Needs Resources' as const 
+          : 'Fully Staffed' as const
+      } : p
+    );
+    setLocalProjects(updatedProjects);
+    
+    toast({
+      title: "Consultant Removed",
+      description: "The consultant has been successfully removed from the project.",
+    });
+  };
+  
   const handleEditProject = (updatedProject: Project) => {
     const updatedProjects = localProjects.map(p => 
       p.id === updatedProject.id ? updatedProject : p
@@ -237,6 +281,7 @@ const Projects: React.FC = () => {
             assignedConsultants={assignedConsultants}
             onAddConsultant={handleAddConsultant}
             onEditProject={() => setShowEditModal(true)}
+            onRemoveConsultant={handleRemoveConsultant}
           />
         ) : (
           <>

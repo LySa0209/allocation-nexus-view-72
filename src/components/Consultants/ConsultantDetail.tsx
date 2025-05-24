@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, Calendar, DollarSign, MapPin, Building, 
-  Briefcase, Tag, Clock, Edit, ArrowLeft 
+  Briefcase, Tag, Clock, Edit, ArrowLeft, Trash2 
 } from 'lucide-react';
 import { 
   Consultant, Allocation, Project 
@@ -15,13 +15,15 @@ interface ConsultantDetailProps {
   allocations: Allocation[];
   projects: Project[];
   onMoveConsultant: () => void;
+  onDeleteAllocation?: (allocationId: string) => void;
 }
 
 const ConsultantDetail: React.FC<ConsultantDetailProps> = ({ 
   consultant, 
   allocations, 
   projects,
-  onMoveConsultant
+  onMoveConsultant,
+  onDeleteAllocation
 }) => {
   const navigate = useNavigate();
   
@@ -158,13 +160,25 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
                       <p className="text-sm font-medium text-primary">{allocation.projectName}</p>
                       <p className="text-xs text-gray-500">{allocation.clientName}</p>
                     </div>
-                    <div className="flex items-center">
-                      <span className="text-xs text-gray-500">
-                        {new Date(allocation.startDate).toLocaleDateString()} - {new Date(allocation.endDate).toLocaleDateString()}
-                      </span>
-                      <span className="ml-2 px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                        {Math.round(allocation.percentage * 100)}%
-                      </span>
+                    <div className="flex items-center space-x-2">
+                      <div className="text-right">
+                        <span className="text-xs text-gray-500 block">
+                          {new Date(allocation.startDate).toLocaleDateString()} - {new Date(allocation.endDate).toLocaleDateString()}
+                        </span>
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                          {Math.round(allocation.percentage * 100)}%
+                        </span>
+                      </div>
+                      {onDeleteAllocation && (
+                        <Button
+                          onClick={() => onDeleteAllocation(allocation.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </li>

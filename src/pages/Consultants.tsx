@@ -166,6 +166,45 @@ const Consultants: React.FC = () => {
     });
   };
   
+  const handleDeleteAllocation = (allocationId: string) => {
+    const allocation = localAllocations.find(a => a.id === allocationId);
+    if (!allocation) return;
+    
+    // Remove the allocation
+    const updatedAllocations = localAllocations.filter(a => a.id !== allocationId);
+    setLocalAllocations(updatedAllocations);
+    
+    // Update consultant status if they have no more allocations
+    const remainingAllocations = updatedAllocations.filter(a => a.consultantId === allocation.consultantId);
+    if (remainingAllocations.length === 0) {
+      const updatedConsultants = localConsultants.map(c => 
+        c.id === allocation.consultantId ? {
+          ...c,
+          status: 'Benched' as const,
+          currentProject: undefined
+        } : c
+      );
+      setLocalConsultants(updatedConsultants);
+    }
+    
+    // Update project resources
+    const updatedProjects = localProjects.map(p => 
+      p.id === allocation.projectId ? {
+        ...p,
+        resourcesAssigned: Math.max(0, p.resourcesAssigned - 1),
+        staffingStatus: p.resourcesAssigned - 1 < p.resourcesNeeded 
+          ? 'Needs Resources' as const 
+          : 'Fully Staffed' as const
+      } : p
+    );
+    setLocalProjects(updatedProjects);
+    
+    toast({
+      title: "Allocation Removed",
+      description: "The allocation has been successfully removed.",
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -177,6 +216,7 @@ const Consultants: React.FC = () => {
             allocations={consultantAllocations}
             projects={localProjects}
             onMoveConsultant={handleMoveConsultant}
+            onDeleteAllocation={handleDeleteAllocation}
           />
         ) : (
           <>

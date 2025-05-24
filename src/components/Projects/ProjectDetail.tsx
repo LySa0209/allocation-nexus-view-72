@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, DollarSign, Building, Briefcase, 
-  Users, ArrowLeft, Clock, Edit
+  Users, ArrowLeft, Clock, Edit, Trash2
 } from 'lucide-react';
 import { 
   Project, PipelineOpportunity, Consultant 
@@ -15,6 +16,7 @@ interface ProjectDetailProps {
   assignedConsultants?: Consultant[];
   onAddConsultant: () => void;
   onEditProject?: () => void;
+  onRemoveConsultant?: (consultantId: string) => void;
 }
 
 const ProjectDetail: React.FC<ProjectDetailProps> = ({ 
@@ -22,7 +24,8 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
   type,
   assignedConsultants = [],
   onAddConsultant,
-  onEditProject
+  onEditProject,
+  onRemoveConsultant
 }) => {
   const navigate = useNavigate();
   const project = type === 'active' ? item as Project : null;
@@ -207,11 +210,23 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
                       <p className="text-sm font-medium text-primary">{consultant.name}</p>
                       <p className="text-xs text-gray-500">{consultant.role}</p>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-gray-500">{consultant.expertise}</span>
-                      <span className="text-xs text-gray-400 mt-1">
-                        {consultant.serviceLine}
-                      </span>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-gray-500">{consultant.expertise}</span>
+                        <span className="text-xs text-gray-400 mt-1">
+                          {consultant.serviceLine}
+                        </span>
+                      </div>
+                      {onRemoveConsultant && (
+                        <Button
+                          onClick={() => onRemoveConsultant(consultant.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </li>
                 ))}
