@@ -1,25 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, Calendar, DollarSign, MapPin, Building, 
-  Briefcase, Tag, Clock, Edit, ArrowLeft, Trash2 
-} from 'lucide-react';
-import { 
-  Consultant, Allocation, Project 
-} from '../../lib/types';
+import { User, Calendar, DollarSign, MapPin, Building, Briefcase, Tag, Clock, Edit, ArrowLeft, Trash2 } from 'lucide-react';
+import { Consultant, Allocation, Project } from '../../lib/types';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 interface ConsultantDetailProps {
   consultant: Consultant;
   allocations: Allocation[];
@@ -28,17 +12,16 @@ interface ConsultantDetailProps {
   onDeleteAllocation?: (allocationId: string) => void;
   onDeleteConsultant?: (consultantId: string) => void;
 }
-
-const ConsultantDetail: React.FC<ConsultantDetailProps> = ({ 
-  consultant, 
-  allocations, 
+const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
+  consultant,
+  allocations,
   projects,
   onMoveConsultant,
   onDeleteAllocation,
   onDeleteConsultant
 }) => {
   const navigate = useNavigate();
-  
+
   // Get project details for each allocation
   const allocationWithProjects = allocations.map(allocation => {
     const project = projects.find(p => p.id === allocation.projectId);
@@ -48,23 +31,17 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
       clientName: project ? project.clientName : 'Unknown Client'
     };
   });
-  
   const handleDeleteConsultant = () => {
     if (onDeleteConsultant) {
       onDeleteConsultant(consultant.id);
       navigate('/consultants');
     }
   };
-  
-  return (
-    <div className="bg-white shadow rounded-lg">
+  return <div className="bg-white shadow rounded-lg">
       {/* Header with back button */}
       <div className="border-b border-gray-200 px-4 py-4 sm:px-6 flex justify-between items-center">
         <div className="flex items-center">
-          <button 
-            onClick={() => navigate('/consultants')}
-            className="mr-4 text-gray-400 hover:text-gray-500"
-          >
+          <button onClick={() => navigate('/consultants')} className="mr-4 text-gray-400 hover:text-gray-500">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -72,19 +49,12 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
           </h3>
         </div>
         <div className="flex space-x-2">
-          <Button 
-            onClick={onMoveConsultant}
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
+          <Button onClick={onMoveConsultant} className="bg-primary hover:bg-primary/90 text-white">
             Move to Project
           </Button>
-          {onDeleteConsultant && (
-            <AlertDialog>
+          {onDeleteConsultant && <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  className="flex items-center space-x-1"
-                >
+                <Button variant="destructive" className="flex items-center space-x-1">
                   <Trash2 className="h-4 w-4" />
                   <span>Delete Consultant</span>
                 </Button>
@@ -103,8 +73,7 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
-            </AlertDialog>
-          )}
+            </AlertDialog>}
         </div>
       </div>
       
@@ -135,34 +104,26 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
                 <Tag className="h-5 w-5 text-gray-400 mr-2" />
                 <span className="text-sm text-gray-700">{consultant.expertise}</span>
               </div>
-              {consultant.location && (
-                <div className="flex items-center">
+              {consultant.location && <div className="flex items-center">
                   <MapPin className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">{consultant.location}</span>
-                </div>
-              )}
-              {consultant.rate && (
-                <div className="flex items-center">
+                </div>}
+              {consultant.rate && <div className="flex items-center">
                   <DollarSign className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">${consultant.rate}/day</span>
-                </div>
-              )}
-              {consultant.preferredSector && (
-                <div className="flex items-center">
+                </div>}
+              {consultant.preferredSector && <div className="flex items-center">
                   <Building className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">Preferred: {consultant.preferredSector}</span>
-                </div>
-              )}
+                </div>}
               <div className="flex items-center">
                 <Calendar className="h-5 w-5 text-gray-400 mr-2" />
                 <span className="text-sm text-gray-700">Start Date: {new Date(consultant.startDate).toLocaleDateString()}</span>
               </div>
-              {consultant.endDate && (
-                <div className="flex items-center">
+              {consultant.endDate && <div className="flex items-center">
                   <Calendar className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="text-sm text-gray-700">End Date: {new Date(consultant.endDate).toLocaleDateString()}</span>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
           
@@ -170,19 +131,11 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-500 mb-2">Current Status</h4>
               <div className="flex items-center">
-                <span
-                  className={`status-badge ${
-                    consultant.status === 'Allocated'
-                      ? 'status-allocated'
-                      : 'status-bench'
-                  } mr-2`}
-                >
+                <span className={`status-badge ${consultant.status === 'Allocated' ? 'status-allocated' : 'status-bench'} mr-2`}>
                   {consultant.status}
                 </span>
                 <span className="text-sm text-gray-700">
-                  {consultant.status === 'Allocated'
-                    ? 'Currently on project'
-                    : 'Available for assignment'}
+                  {consultant.status === 'Allocated' ? 'Currently on project' : 'Available for assignment'}
                 </span>
               </div>
             </div>
@@ -196,13 +149,9 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
           Allocation History
         </h3>
         
-        {allocationWithProjects.length === 0 ? (
-          <p className="text-sm text-gray-500">No allocations found for this consultant.</p>
-        ) : (
-          <div className="overflow-hidden">
+        {allocationWithProjects.length === 0 ? <p className="text-sm text-gray-500">No allocations found for this consultant.</p> : <div className="overflow-hidden">
             <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-              {allocationWithProjects.map((allocation) => (
-                <li key={allocation.id} className="px-4 py-4">
+              {allocationWithProjects.map(allocation => <li key={allocation.id} className="px-4 py-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-primary">{allocation.projectName}</p>
@@ -217,26 +166,13 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
                           {Math.round(allocation.percentage * 100)}%
                         </span>
                       </div>
-                      {onDeleteAllocation && (
-                        <Button
-                          onClick={() => onDeleteAllocation(allocation.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      {onDeleteAllocation}
                     </div>
                   </div>
-                </li>
-              ))}
+                </li>)}
             </ul>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ConsultantDetail;
