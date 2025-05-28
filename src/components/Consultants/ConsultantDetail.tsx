@@ -82,7 +82,7 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
         <div className="flex flex-col sm:flex-row sm:justify-between">
           <div className="mb-6 sm:mb-0">
             <div className="flex items-center mb-4">
-              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+              <div className="h-12 w-12 rounded-full flex items-center justify-center mr-4 bg-gray-500">
                 <User className="h-6 w-6 text-primary" />
               </div>
               <div>
