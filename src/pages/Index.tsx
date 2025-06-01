@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useDataSource } from '@/context/DataSourceContext';
 import { DashboardMetrics, Consultant, Project, PipelineOpportunity } from '@/lib/types';
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -107,16 +108,33 @@ const Dashboard: React.FC = () => {
         
         {/* Metrics Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricsCard title="Total Consultants" value={dashboardMetrics.totalConsultants} icon={<Users className="h-5 w-5 text-primary" />} />
+          <MetricsCard 
+            title="Total Consultants" 
+            value={dashboardMetrics.totalConsultants} 
+            icon={<Users className="h-5 w-5 text-primary" />} 
+          />
           
-          <MetricsCard title="On Projects" value={dashboardMetrics.allocatedConsultants} icon={<UserCheck className="h-5 w-5 text-primary" />} />
+          <MetricsCard 
+            title="On Projects" 
+            value={dashboardMetrics.allocatedConsultants} 
+            icon={<UserCheck className="h-5 w-5 text-primary" />} 
+          />
           
-          <MetricsCard title="On Bench" value={dashboardMetrics.benchedConsultants} icon={<UserMinus className="h-5 w-5 text-orange-500" />} />
+          <MetricsCard 
+            title="On Bench" 
+            value={dashboardMetrics.benchedConsultants} 
+            icon={<UserMinus className="h-5 w-5 text-orange-500" />} 
+          />
           
-          <MetricsCard title="Chargeability" value={`${(dashboardMetrics.chargeability * 100).toFixed(1)}%`} icon={<BarChart2 className="h-5 w-5 text-blue-500" />} trend={{
-          value: 2.5,
-          isPositive: true
-        }} />
+          <MetricsCard 
+            title="Utilization" 
+            value={`${(dashboardMetrics.chargeability * 100).toFixed(1)}%`} 
+            icon={<BarChart2 className="h-5 w-5 text-blue-500" />} 
+            trend={{
+              value: 2.5,
+              isPositive: true
+            }} 
+          />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -134,4 +152,5 @@ const Dashboard: React.FC = () => {
       </main>
     </div>;
 };
+
 export default Dashboard;
