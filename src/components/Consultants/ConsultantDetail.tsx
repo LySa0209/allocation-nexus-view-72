@@ -33,8 +33,8 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
   if (!consultant) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-center py-4">Consultant not found</p>
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-500 text-center py-8">Consultant not found</p>
         </div>
       </div>
     );
@@ -43,91 +43,124 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
   const currentProject = projects.find(p => p.id === consultant.currentProject);
 
   return (
-    <div className="space-y-6">
-      {/* Consultant Info */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-4">{consultant.name}</h3>
-        <p className="text-gray-500">{consultant.role}</p>
-        <p className="text-gray-500">Service Line: {consultant.serviceLine}</p>
-        <p className="text-gray-500">Expertise: {consultant.expertise}</p>
-        <p className="text-gray-500">Status: {consultant.status}</p>
-        {consultant.location && (
-          <p className="text-gray-500">Location: {consultant.location}</p>
-        )}
-        {consultant.rate && (
-          <p className="text-gray-500">Rate: ${consultant.rate}/day</p>
-        )}
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Main Consultant Info */}
+      <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{consultant.name}</h1>
+          <div className="flex items-center gap-4 text-lg">
+            <span className="text-gray-700">{consultant.role}</span>
+            <span className="text-gray-400">•</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              consultant.status === 'Allocated' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              {consultant.status}
+            </span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
+          <div className="space-y-3">
+            <div>
+              <span className="font-medium text-gray-700">Service Line:</span>
+              <p className="mt-1">{consultant.serviceLine}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">Expertise:</span>
+              <p className="mt-1">{consultant.expertise}</p>
+            </div>
+            {consultant.preferredSector && (
+              <div>
+                <span className="font-medium text-gray-700">Preferred Sector:</span>
+                <p className="mt-1">{consultant.preferredSector}</p>
+              </div>
+            )}
+          </div>
+          <div className="space-y-3">
+            {consultant.location && (
+              <div>
+                <span className="font-medium text-gray-700">Location:</span>
+                <p className="mt-1">{consultant.location}</p>
+              </div>
+            )}
+            {consultant.rate && (
+              <div>
+                <span className="font-medium text-gray-700">Daily Rate:</span>
+                <p className="mt-1">${consultant.rate.toLocaleString()}</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900">Actions</h3>
-          <div className="flex gap-2">
-            {consultant.status === 'Allocated' && (
-              <Button onClick={onMoveConsultant} variant="outline" size="sm">
-                Move Consultant
-              </Button>
-            )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Consultant
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete {consultant.name}? This action cannot be undone and will remove all allocation history.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => onDeleteConsultant(consultant.id)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+      {/* Profile Details */}
+      <div className="bg-white rounded-lg shadow-sm border p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
+          <div>
+            <span className="font-medium text-gray-700">Start Date:</span>
+            <p className="mt-1">{new Date(consultant.startDate).toLocaleDateString()}</p>
           </div>
+          {consultant.endDate && (
+            <div>
+              <span className="font-medium text-gray-700">End Date:</span>
+              <p className="mt-1">{new Date(consultant.endDate).toLocaleDateString()}</p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Current Assignment */}
       {consultant.status === 'Allocated' && currentProject && (
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-semibold mb-4">Current Assignment</h3>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="font-medium">{currentProject.name}</p>
-            <p className="text-sm text-gray-500">Client: {currentProject.clientName}</p>
-            <p className="text-sm text-gray-500">
-              {new Date(currentProject.startDate).toLocaleDateString()} - {new Date(currentProject.endDate).toLocaleDateString()}
-            </p>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Assignment</h2>
+          <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-400">
+            <h3 className="font-semibold text-blue-900 text-lg mb-2">{currentProject.name}</h3>
+            <div className="space-y-2 text-blue-800">
+              <p><span className="font-medium">Client:</span> {currentProject.clientName}</p>
+              <p><span className="font-medium">Duration:</span> {new Date(currentProject.startDate).toLocaleDateString()} - {new Date(currentProject.endDate).toLocaleDateString()}</p>
+              {currentProject.sector && (
+                <p><span className="font-medium">Sector:</span> {currentProject.sector}</p>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Profile Details */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-4">Profile Details</h3>
-        <p className="text-gray-500">
-          Start Date: {new Date(consultant.startDate).toLocaleDateString()}
-        </p>
-        {consultant.endDate && (
-          <p className="text-gray-500">
-            End Date: {new Date(consultant.endDate).toLocaleDateString()}
-          </p>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 pt-4">
+        {consultant.status === 'Allocated' && (
+          <Button onClick={onMoveConsultant} variant="outline">
+            Move Consultant
+          </Button>
         )}
-        {consultant.preferredSector && (
-          <p className="text-gray-500 mt-2">
-            Preferred Sector: {consultant.preferredSector}
-          </p>
-        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Consultant
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {consultant.name}? This action cannot be undone and will remove all allocation history.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => onDeleteConsultant(consultant.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

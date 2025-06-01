@@ -37,8 +37,8 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
   if (!item) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-center py-4">Project not found</p>
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-500 text-center py-8">Project not found</p>
         </div>
       </div>
     );
@@ -47,79 +47,105 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
   const isProject = 'staffingStatus' in item;
 
   return (
-    <div className="space-y-6">
-      {/* Project Info */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-4">{item.name}</h3>
-        <p className="text-gray-500">{item.clientName}</p>
-        <p className="text-gray-500">
-          {new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}
-        </p>
-        {isProject && (
-          <p className="text-gray-700 mt-2">{(item as Project).deliverables}</p>
-        )}
-        {!isProject && (
-          <p className="text-gray-700 mt-2">Win Percentage: {(item as PipelineOpportunity).winPercentage}%</p>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900">Actions</h3>
-          <div className="flex gap-2">
-            {isProject && (
-              <Button onClick={onEditProject} variant="outline" size="sm">
-                Edit Project
-              </Button>
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Main Project Info */}
+      <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{item.name}</h1>
+          <div className="flex items-center gap-4 text-lg">
+            <span className="text-gray-700">{item.clientName}</span>
+            <span className="text-gray-400">•</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              isProject 
+                ? (item as Project).staffingStatus === 'Fully Staffed' 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-yellow-100 text-yellow-800'
+                : 'bg-blue-100 text-blue-800'
+            }`}>
+              {isProject ? (item as Project).staffingStatus : 'Pipeline Opportunity'}
+            </span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
+          <div className="space-y-3">
+            <div>
+              <span className="font-medium text-gray-700">Timeline:</span>
+              <p className="mt-1">
+                {new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}
+              </p>
+            </div>
+            {item.sector && (
+              <div>
+                <span className="font-medium text-gray-700">Sector:</span>
+                <p className="mt-1">{item.sector}</p>
+              </div>
             )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete {type === 'active' ? 'Project' : 'Opportunity'}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete {type === 'active' ? 'Project' : 'Opportunity'}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete {item.name}? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={() => onDeleteProject(item.id)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {isProject && (item as Project).deliverables && (
+              <div>
+                <span className="font-medium text-gray-700">Deliverables:</span>
+                <p className="mt-1">{(item as Project).deliverables}</p>
+              </div>
+            )}
+          </div>
+          <div className="space-y-3">
+            <div>
+              <span className="font-medium text-gray-700">Resources Needed:</span>
+              <p className="mt-1">
+                {isProject ? (item as Project).resourcesNeeded : (item as PipelineOpportunity).resourcesNeeded}
+              </p>
+            </div>
+            {isProject && (
+              <div>
+                <span className="font-medium text-gray-700">Resources Assigned:</span>
+                <p className="mt-1">{(item as Project).resourcesAssigned}</p>
+              </div>
+            )}
+            {!isProject && (
+              <div>
+                <span className="font-medium text-gray-700">Win Percentage:</span>
+                <p className="mt-1">{(item as PipelineOpportunity).winPercentage}%</p>
+              </div>
+            )}
+            {isProject && (item as Project).budget && (
+              <div>
+                <span className="font-medium text-gray-700">Budget:</span>
+                <p className="mt-1">${(item as Project).budget?.toLocaleString()}</p>
+              </div>
+            )}
+            {!isProject && (item as PipelineOpportunity).estimatedValue && (
+              <div>
+                <span className="font-medium text-gray-700">Estimated Value:</span>
+                <p className="mt-1">${(item as PipelineOpportunity).estimatedValue?.toLocaleString()}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Assigned Consultants - only for active projects */}
       {isProject && (
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Assigned Consultants</h3>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Assigned Consultants</h2>
             <Button onClick={onAddConsultant} size="sm">
               Add Consultant
             </Button>
           </div>
           <div className="space-y-3">
             {assignedConsultants.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No consultants assigned</p>
+              <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                <p>No consultants assigned to this project</p>
+              </div>
             ) : (
               assignedConsultants.map((consultant) => (
-                <div key={consultant.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={consultant.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                   <div>
-                    <p className="font-medium">{consultant.name}</p>
-                    <p className="text-sm text-gray-500">{consultant.role} • {consultant.expertise}</p>
+                    <h3 className="font-medium text-gray-900">{consultant.name}</h3>
+                    <p className="text-sm text-gray-600">{consultant.role} • {consultant.expertise}</p>
+                    {consultant.location && (
+                      <p className="text-sm text-gray-500">{consultant.location}</p>
+                    )}
                   </div>
                   <Button 
                     variant="ghost" 
@@ -136,30 +162,38 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-4">Timeline</h3>
-        <p className="text-gray-500">
-          Start Date: {new Date(item.startDate).toLocaleDateString()}
-        </p>
-        <p className="text-gray-500">
-          End Date: {new Date(item.endDate).toLocaleDateString()}
-        </p>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 pt-4">
         {isProject && (
-          <>
-            <p className="text-gray-500 mt-2">
-              Resources Needed: {(item as Project).resourcesNeeded}
-            </p>
-            <p className="text-gray-500">
-              Resources Assigned: {(item as Project).resourcesAssigned}
-            </p>
-          </>
+          <Button onClick={onEditProject} variant="outline">
+            Edit Project
+          </Button>
         )}
-        {!isProject && (
-          <p className="text-gray-500 mt-2">
-            Resources Needed: {(item as PipelineOpportunity).resourcesNeeded}
-          </p>
-        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete {type === 'active' ? 'Project' : 'Opportunity'}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {type === 'active' ? 'Project' : 'Opportunity'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {item.name}? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => onDeleteProject(item.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
