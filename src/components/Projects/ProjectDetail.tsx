@@ -47,7 +47,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({
               <Edit className="h-4 w-4" />
               <span>Edit</span>
             </Button>}
-          {type === 'active' && <Button onClick={onAddConsultant} className="bg-primary hover:bg-primary/90 text-white" disabled={project?.staffingStatus === 'Fully Staffed'}>
+          {type === 'active' && <Button onClick={onAddConsultant} disabled={project?.staffingStatus === 'Fully Staffed'} className="bg-primary hover:bg-primary/90 text-gray-950">
               Add Consultant
             </Button>}
           {onDeleteProject && <AlertDialog>
