@@ -49,7 +49,7 @@ const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
           </h3>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={onMoveConsultant} className="bg-primary hover:bg-primary/90 text-white">
+          <Button onClick={onMoveConsultant} className="bg-primary hover:bg-primary/90 text-zinc-950">
             Move to Project
           </Button>
           {onDeleteConsultant && <AlertDialog>
