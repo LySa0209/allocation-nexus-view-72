@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects } from '@/lib/api';
 import { Consultant } from '@/lib/types';
-
 const Consultants: React.FC = () => {
   const {
     id
