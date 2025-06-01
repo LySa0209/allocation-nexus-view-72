@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, User, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ interface AllocatedConsultant extends Consultant {
   score?: number;
   flag?: string;
 }
+
 interface AllocatedConsultantsProps {
   consultants: AllocatedConsultant[];
   onRemoveConsultant: (consultantId: string) => void;
@@ -16,6 +18,7 @@ interface AllocatedConsultantsProps {
   onConfirmAllocation?: () => void;
   confirmLoading?: boolean;
 }
+
 export const AllocatedConsultants = ({
   consultants,
   onRemoveConsultant,
@@ -28,13 +31,17 @@ export const AllocatedConsultants = ({
     // In a real app, this would be based on actual allocation data
     return Math.round(Math.random() * 50) + 50; // Between 50-100%
   };
+
   const totalAllocationPercentage = consultants.reduce((total, consultant) => {
     return total + getAllocationPercentage(consultant);
   }, 0);
+
   return <div className="bg-white rounded-lg shadow p-4 h-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold">
-      </h3>
+        <div>
+          <h3 className="text-xl font-semibold mb-1">Allocated to Project</h3>
+          <p className="text-sm text-gray-500">Consultants added to this project</p>
+        </div>
         <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
           {consultants.length} allocated
         </span>

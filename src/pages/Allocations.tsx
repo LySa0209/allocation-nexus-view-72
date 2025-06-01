@@ -11,11 +11,13 @@ import { consultants as mockConsultants, allocations as mockAllocations, project
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects, setConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
+
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
   const allocatedCount = consultants.filter(c => c.status === "Allocated").length;
   return Math.round(allocatedCount / consultants.length * 100);
 };
+
 const Allocations: React.FC = () => {
   const {
     toast
@@ -226,11 +228,11 @@ const Allocations: React.FC = () => {
       <main className="container mx-auto px-4 py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="projects">Utilization</TabsTrigger>
             <TabsTrigger value="consultants_allocation">Consultants & Allocation</TabsTrigger>
           </TabsList>
           
-          {/* Projects Tab (Merged with KPI) */}
+          {/* Utilization Tab (Previously Projects Tab) */}
           <TabsContent value="projects" className="space-y-4">
             <AllocationKPI totalConsultants={consultants.length} availableConsultants={benchedConsultants.length} fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} partiallyAllocated={partiallyAllocated} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,17 +244,13 @@ const Allocations: React.FC = () => {
           
           {/* Combined Consultants & Allocation Tab */}
           <TabsContent value="consultants_allocation" className="space-y-4">
+            <AllocationKPI totalConsultants={consultants.length} availableConsultants={benchedConsultants.length} fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} partiallyAllocated={partiallyAllocated} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div ref={consultantsListRef}>
                 <ConsultantsList consultants={consultants} onAllocateConsultant={handleAllocateConsultant} selectedConsultants={selectedConsultantIds} selectedProjectId={selectedProject?.id || null} />
               </div>
               
               <div ref={allocatedConsultantsRef}>
-                {/* Add a custom div with the allocated consultants title and guidance text */}
-                <div className="bg-white rounded-lg shadow p-4 mb-4">
-                  <h3 className="font-semibold mb-1 text-xl">Allocated to Project</h3>
-                  <p className="text-sm text-gray-500">Consultants added to this project</p>
-                </div>
                 <AllocatedConsultants consultants={allocatedConsultants} onRemoveConsultant={handleRemoveConsultant} requiredFTEs={fteValue} onConfirmAllocation={handleConfirmAllocation} confirmLoading={confirmLoading} />
               </div>
             </div>
@@ -261,4 +259,5 @@ const Allocations: React.FC = () => {
       </main>
     </div>;
 };
+
 export default Allocations;
