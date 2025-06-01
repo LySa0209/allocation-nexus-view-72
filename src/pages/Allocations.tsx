@@ -11,13 +11,11 @@ import { consultants as mockConsultants, allocations as mockAllocations, project
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects, setConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
-
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
   const allocatedCount = consultants.filter(c => c.status === "Allocated").length;
   return Math.round(allocatedCount / consultants.length * 100);
 };
-
 const Allocations: React.FC = () => {
   const {
     toast
@@ -228,7 +226,7 @@ const Allocations: React.FC = () => {
       <main className="container mx-auto px-4 py-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="projects">Utilization</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="consultants_allocation">Consultants & Allocation</TabsTrigger>
           </TabsList>
           
@@ -259,5 +257,4 @@ const Allocations: React.FC = () => {
       </main>
     </div>;
 };
-
 export default Allocations;
