@@ -180,7 +180,7 @@ const Consultants: React.FC = () => {
                 <h1 className="text-2xl font-bold text-gray-900">Consultants</h1>
                 <p className="text-gray-500">Manage your consulting resources</p>
               </div>
-              <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2 bg-lime-600 hover:bg-lime-500 text-zinc-950">
+              <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2 text-zinc-950 bg-lime-500 hover:bg-lime-400">
                 <Plus className="h-4 w-4" />
                 Add Consultant
               </Button>
