@@ -1,178 +1,180 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Calendar, DollarSign, MapPin, Building, Briefcase, Tag, Clock, Edit, ArrowLeft, Trash2 } from 'lucide-react';
-import { Consultant, Allocation, Project } from '../../lib/types';
+import React, { useState, useEffect } from 'react';
+import { Consultant, Allocation, Project } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+
 interface ConsultantDetailProps {
   consultant: Consultant;
-  allocations: Allocation[];
-  projects: Project[];
-  onMoveConsultant: () => void;
-  onDeleteAllocation?: (allocationId: string) => void;
-  onDeleteConsultant?: (consultantId: string) => void;
+  onDeleteConsultant: (consultantId: string) => void;
+  onDeleteAllocation: (allocationId: string) => void;
 }
+
 const ConsultantDetail: React.FC<ConsultantDetailProps> = ({
   consultant,
-  allocations,
-  projects,
-  onMoveConsultant,
-  onDeleteAllocation,
-  onDeleteConsultant
+  onDeleteConsultant,
+  onDeleteAllocation
 }) => {
-  const navigate = useNavigate();
+  const [consultantAllocations, setConsultantAllocations] = useState<Allocation[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  // Get project details for each allocation
-  const allocationWithProjects = allocations.map(allocation => {
-    const project = projects.find(p => p.id === allocation.projectId);
-    return {
-      ...allocation,
-      projectName: project ? project.name : 'Unknown Project',
-      clientName: project ? project.clientName : 'Unknown Client'
-    };
-  });
-  const handleDeleteConsultant = () => {
-    if (onDeleteConsultant) {
-      onDeleteConsultant(consultant.id);
-      navigate('/consultants');
-    }
-  };
-  return <div className="bg-white shadow rounded-lg">
-      {/* Header with back button */}
-      <div className="border-b border-gray-200 px-4 py-4 sm:px-6 flex justify-between items-center">
-        <div className="flex items-center">
-          <button onClick={() => navigate('/consultants')} className="mr-4 text-gray-400 hover:text-gray-500">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Consultant Details
-          </h3>
-        </div>
-        <div className="flex space-x-2">
-          <Button onClick={onMoveConsultant} className="bg-primary hover:bg-primary/90 text-white">
-            Move to Project
-          </Button>
-          {onDeleteConsultant && <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="flex items-center space-x-1">
-                  <Trash2 className="h-4 w-4" />
-                  <span>Delete Consultant</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete {consultant.name}? This action cannot be undone and will remove all allocation history.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteConsultant}>
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>}
-        </div>
-      </div>
-      
-      {/* Consultant information */}
-      <div className="px-4 py-5 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between">
-          <div className="mb-6 sm:mb-0">
-            <div className="flex items-center mb-4">
-              <div className="h-12 w-12 rounded-full flex items-center justify-center mr-4 bg-gray-500">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{consultant.name}</h2>
-                <p className="text-sm text-gray-500">{consultant.id}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center">
-                <Briefcase className="h-5 w-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-700">{consultant.role}</span>
-              </div>
-              <div className="flex items-center">
-                <Building className="h-5 w-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-700">{consultant.serviceLine}</span>
-              </div>
-              <div className="flex items-center">
-                <Tag className="h-5 w-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-700">{consultant.expertise}</span>
-              </div>
-              {consultant.location && <div className="flex items-center">
-                  <MapPin className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">{consultant.location}</span>
-                </div>}
-              {consultant.rate && <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">${consultant.rate}/day</span>
-                </div>}
-              {consultant.preferredSector && <div className="flex items-center">
-                  <Building className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">Preferred: {consultant.preferredSector}</span>
-                </div>}
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-                <span className="text-sm text-gray-700">Start Date: {new Date(consultant.startDate).toLocaleDateString()}</span>
-              </div>
-              {consultant.endDate && <div className="flex items-center">
-                  <Calendar className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-700">End Date: {new Date(consultant.endDate).toLocaleDateString()}</span>
-                </div>}
-            </div>
+  useEffect(() => {
+    // Mock allocations and projects for now
+    const mockAllocations: Allocation[] = [
+      {
+        id: 'a1',
+        consultantId: consultant.id,
+        projectId: 'p1',
+        startDate: '2023-01-01',
+        endDate: '2023-12-31',
+        percentage: 100
+      }
+    ];
+
+    const mockProjects: Project[] = [
+      {
+        id: 'p1',
+        name: 'Project Alpha',
+        clientName: 'Client A',
+        status: 'Active',
+        startDate: '2023-01-01',
+        endDate: '2023-12-31',
+        resourcesNeeded: 5,
+        resourcesAssigned: 3,
+        staffingStatus: 'Needs Resources'
+      }
+    ];
+
+    setConsultantAllocations(mockAllocations);
+    setProjects(mockProjects);
+  }, [consultant.id]);
+
+  return (
+    <div className="space-y-6">
+      {/* Consultant Info */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-semibold mb-4">Consultant Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm font-medium text-gray-500">Name</p>
+            <p className="text-gray-900">{consultant.name}</p>
           </div>
-          
-          <div className="flex flex-col justify-between">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <h4 className="text-sm font-medium text-gray-500 mb-2">Current Status</h4>
-              <div className="flex items-center">
-                <span className={`status-badge ${consultant.status === 'Allocated' ? 'status-allocated' : 'status-bench'} mr-2`}>
-                  {consultant.status}
-                </span>
-                <span className="text-sm text-gray-700">
-                  {consultant.status === 'Allocated' ? 'Currently on project' : 'Available for assignment'}
-                </span>
-              </div>
-            </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Role</p>
+            <p className="text-gray-900">{consultant.role}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Service Line</p>
+            <p className="text-gray-900">{consultant.serviceLine}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Expertise</p>
+            <p className="text-gray-900">{consultant.expertise}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Status</p>
+            <p className="text-gray-900">{consultant.status}</p>
           </div>
         </div>
       </div>
-      
-      {/* Allocations Timeline */}
-      <div className="px-4 py-5 sm:px-6 border-t border-gray-200">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          Allocation History
-        </h3>
-        
-        {allocationWithProjects.length === 0 ? <p className="text-sm text-gray-500">No allocations found for this consultant.</p> : <div className="overflow-hidden">
-            <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-              {allocationWithProjects.map(allocation => <li key={allocation.id} className="px-4 py-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-primary">{allocation.projectName}</p>
-                      <p className="text-xs text-gray-500">{allocation.clientName}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-right">
-                        <span className="text-xs text-gray-500 block">
-                          {new Date(allocation.startDate).toLocaleDateString()} - {new Date(allocation.endDate).toLocaleDateString()}
-                        </span>
-                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                          {Math.round(allocation.percentage * 100)}%
-                        </span>
-                      </div>
-                      {onDeleteAllocation}
-                    </div>
+
+      {/* Delete Consultant Button */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900">Actions</h3>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Consultant
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Consultant</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete {consultant.name}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={() => onDeleteConsultant(consultant.id)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+
+      {/* Current Allocation */}
+      {consultant.currentProject && (
+        <div className="bg-white rounded-lg shadow p-4">
+          <h3 className="text-lg font-semibold mb-4">Current Allocation</h3>
+          <p>Currently allocated to project: {consultant.currentProject}</p>
+        </div>
+      )}
+
+      {/* Allocation History */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-semibold mb-4">Allocation History</h3>
+        <div className="space-y-3">
+          {consultantAllocations.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No allocation history</p>
+          ) : (
+            consultantAllocations.map((allocation) => {
+              const project = projects.find(p => p.id === allocation.projectId);
+              return (
+                <div key={allocation.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">{project?.name || 'Unknown Project'}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(allocation.startDate).toLocaleDateString()} - 
+                      {new Date(allocation.endDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-500">{allocation.percentage}% allocation</p>
                   </div>
-                </li>)}
-            </ul>
-          </div>}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => onDeleteAllocation(allocation.id)}
+                    className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
-    </div>;
+
+      {/* Skills */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-semibold mb-4">Skills</h3>
+        <div className="flex flex-wrap gap-2">
+          <span className="px-2 py-1 rounded-full bg-gray-200 text-gray-700 text-sm">
+            Skill 1
+          </span>
+          <span className="px-2 py-1 rounded-full bg-gray-200 text-gray-700 text-sm">
+            Skill 2
+          </span>
+          <span className="px-2 py-1 rounded-full bg-gray-200 text-gray-700 text-sm">
+            Skill 3
+          </span>
+        </div>
+      </div>
+
+      {/* Availability */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <h3 className="text-lg font-semibold mb-4">Availability</h3>
+        <p>Available from: Immediately</p>
+      </div>
+    </div>
+  );
 };
+
 export default ConsultantDetail;
