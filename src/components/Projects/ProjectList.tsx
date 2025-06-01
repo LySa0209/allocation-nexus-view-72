@@ -94,7 +94,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
             </button>
           </nav>
           
-          <Button onClick={onAddNew} className="mb-4 text-zinc-950 bg-lime-600 hover:bg-lime-500">
+          <Button onClick={onAddNew} className="mb-4 text-zinc-950 bg-lime-500 hover:bg-lime-400">
             <Plus className="w-4 h-4 mr-2" />
             New {activeTab === 'active' ? 'Project' : 'Opportunity'}
           </Button>
