@@ -6,24 +6,23 @@ import { ProjectNeedsList } from '@/components/Allocation/ProjectNeedsList';
 import { ProjectDetailPanel } from '@/components/Allocation/ProjectDetailPanel';
 import { ConsultantsList } from '@/components/Allocation/ConsultantsList';
 import { AllocatedConsultants } from '@/components/Allocation/AllocatedConsultants';
+import SuggestedConsultants from '@/components/Allocation/SuggestedConsultants';
+import { SkillsDevelopmentPopup } from '@/components/Allocation/SkillsDevelopmentPopup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { consultants as mockConsultants, allocations as mockAllocations, projects as mockProjects, pipelineOpportunities as mockPipeline } from '../data/mockData';
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects, setConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
+
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
   const allocatedCount = consultants.filter(c => c.status === "Allocated").length;
   return Math.round(allocatedCount / consultants.length * 100);
 };
+
 const Allocations: React.FC = () => {
-  const {
-    toast
-  } = useToast();
-  const {
-    dataSource,
-    setIsLoading
-  } = useDataSource();
+  const { toast } = useToast();
+  const { dataSource, setIsLoading } = useDataSource();
   const [consultants, setConsultants] = useState<Consultant[]>(mockConsultants);
   const [allocations, setAllocations] = useState(mockAllocations);
   const [projects, setProjects] = useState<Project[]>(mockProjects);
@@ -32,6 +31,7 @@ const Allocations: React.FC = () => {
   const [allocatedConsultants, setAllocatedConsultants] = useState<Consultant[]>([]);
   const [selectedConsultantIds, setSelectedConsultantIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("projects");
+  const [selectedConsultantForSkills, setSelectedConsultantForSkills] = useState<Consultant | null>(null);
 
   // Project detail sliders state
   const [fteValue, setFteValue] = useState(3);
@@ -220,7 +220,19 @@ const Allocations: React.FC = () => {
       setConfirmLoading(false);
     }
   };
-  return <div className="min-h-screen bg-gray-50">
+
+  // Handle consultant click for skills development
+  const handleConsultantClickForSkills = (consultant: Consultant) => {
+    setSelectedConsultantForSkills(consultant);
+  };
+
+  // Handle close skills popup
+  const handleCloseSkillsPopup = () => {
+    setSelectedConsultantForSkills(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="container mx-auto px-4 py-4">
@@ -232,29 +244,75 @@ const Allocations: React.FC = () => {
           
           {/* Utilization Tab (Previously Projects Tab) */}
           <TabsContent value="projects" className="space-y-4">
-            <AllocationKPI totalConsultants={consultants.length} availableConsultants={benchedConsultants.length} fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} partiallyAllocated={partiallyAllocated} />
+            <AllocationKPI 
+              totalConsultants={consultants.length} 
+              availableConsultants={benchedConsultants.length} 
+              fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} 
+              partiallyAllocated={partiallyAllocated} 
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ProjectNeedsList projects={projects} pipelineOpportunities={pipelineOpportunities} onSelectProject={handleSelectProject} selectedProjectId={selectedProject?.id || null} />
+              <ProjectNeedsList 
+                projects={projects} 
+                pipelineOpportunities={pipelineOpportunities} 
+                onSelectProject={handleSelectProject} 
+                selectedProjectId={selectedProject?.id || null} 
+              />
               
-              <ProjectDetailPanel project={selectedProject} fteValue={fteValue} onFteChange={setFteValue} seniorityValue={seniorityMix} onSeniorityChange={setSeniorityMix} priorityValue={priorityValue} onPriorityChange={setPriorityValue} onContinue={handleContinueToConsultants} />
+              <ProjectDetailPanel 
+                project={selectedProject} 
+                fteValue={fteValue} 
+                onFteChange={setFteValue} 
+                seniorityValue={seniorityMix} 
+                onSeniorityChange={setSeniorityMix} 
+                priorityValue={priorityValue} 
+                onPriorityChange={setPriorityValue} 
+                onContinue={handleContinueToConsultants} 
+              />
             </div>
           </TabsContent>
           
           {/* Combined Consultants & Allocation Tab */}
           <TabsContent value="consultants_allocation" className="space-y-4">
-            <AllocationKPI totalConsultants={consultants.length} availableConsultants={benchedConsultants.length} fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} partiallyAllocated={partiallyAllocated} />
+            <AllocationKPI 
+              totalConsultants={consultants.length} 
+              availableConsultants={benchedConsultants.length} 
+              fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} 
+              partiallyAllocated={partiallyAllocated} 
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div ref={consultantsListRef}>
-                <ConsultantsList consultants={consultants} onAllocateConsultant={handleAllocateConsultant} selectedConsultants={selectedConsultantIds} selectedProjectId={selectedProject?.id || null} />
+                <SuggestedConsultants
+                  consultants={consultants}
+                  selectedProject={selectedProject}
+                  onSelectConsultant={() => {}} // Keep existing empty function for now
+                  onAllocateConsultant={handleAllocateConsultant}
+                  selectedConsultantId={null}
+                  onConsultantClick={handleConsultantClickForSkills}
+                />
               </div>
               
               <div ref={allocatedConsultantsRef}>
-                <AllocatedConsultants consultants={allocatedConsultants} onRemoveConsultant={handleRemoveConsultant} requiredFTEs={fteValue} onConfirmAllocation={handleConfirmAllocation} confirmLoading={confirmLoading} />
+                <AllocatedConsultants 
+                  consultants={allocatedConsultants} 
+                  onRemoveConsultant={handleRemoveConsultant} 
+                  requiredFTEs={fteValue} 
+                  onConfirmAllocation={handleConfirmAllocation} 
+                  confirmLoading={confirmLoading} 
+                />
               </div>
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Skills Development Popup */}
+        <SkillsDevelopmentPopup
+          consultant={selectedConsultantForSkills}
+          project={selectedProject}
+          onClose={handleCloseSkillsPopup}
+        />
       </main>
-    </div>;
+    </div>
+  );
 };
+
 export default Allocations;

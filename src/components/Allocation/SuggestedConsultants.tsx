@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Consultant, Project, PipelineOpportunity } from '@/lib/types';
 import { 
@@ -19,6 +18,7 @@ interface SuggestedConsultantsProps {
   onSelectConsultant: (consultant: Consultant) => void;
   onAllocateConsultant: (consultant: Consultant) => void;
   selectedConsultantId: string | null;
+  onConsultantClick?: (consultant: Consultant) => void;
 }
 
 // Helper function to calculate a match score between consultant and project
@@ -51,6 +51,7 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
   onSelectConsultant,
   onAllocateConsultant,
   selectedConsultantId,
+  onConsultantClick,
 }) => {
   // Filter for consultants on bench
   const availableConsultants = consultants.filter(c => c.status === 'Benched');
@@ -120,7 +121,7 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
         </div>
         {selectedProject && (
           <div className="mt-2 text-sm text-gray-500">
-            Showing best matches for {selectedProject.name}
+            Showing best matches for {selectedProject.name}. Click on a consultant to see recommended skills.
           </div>
         )}
       </div>
@@ -166,7 +167,12 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
               return (
                 <tr 
                   key={consultant.id} 
-                  onClick={() => onSelectConsultant(consultant)}
+                  onClick={() => {
+                    onSelectConsultant(consultant);
+                    if (selectedProject && onConsultantClick) {
+                      onConsultantClick(consultant);
+                    }
+                  }}
                   className={`hover:bg-gray-50 cursor-pointer ${
                     selectedConsultantId === consultant.id ? 'bg-purple-50' : ''
                   }`}
