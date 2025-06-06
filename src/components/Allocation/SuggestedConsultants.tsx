@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Consultant, Project, PipelineOpportunity } from '@/lib/types';
 import { 
   User, 
@@ -7,17 +8,9 @@ import {
   ArrowUpDown, 
   Filter,
   Check,
-  DollarSign,
-  ChevronDown,
-  BookOpen
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 import { isWithinInterval } from 'date-fns';
 
 interface SuggestedConsultantsProps {
@@ -26,7 +19,6 @@ interface SuggestedConsultantsProps {
   onSelectConsultant: (consultant: Consultant) => void;
   onAllocateConsultant: (consultant: Consultant) => void;
   selectedConsultantId: string | null;
-  allocatedConsultants?: Consultant[];
 }
 
 // Helper function to calculate a match score between consultant and project
@@ -53,68 +45,13 @@ const calculateMatchScore = (consultant: Consultant, project: Project | Pipeline
   return Math.min(score, 100); // Cap at 100
 };
 
-// Helper function to suggest skills for allocated consultants
-const getSuggestedSkills = (project: Project | PipelineOpportunity, allocatedConsultants: Consultant[] = []): string[] => {
-  const projectSkills: string[] = [];
-  
-  // Add sector-specific skills
-  if (project.sector) {
-    const sectorSkills: Record<string, string[]> = {
-      'Technology': ['Cloud Architecture', 'DevOps', 'API Design', 'Cybersecurity'],
-      'Finance': ['Financial Modeling', 'Risk Assessment', 'Regulatory Compliance', 'ESG Reporting'],
-      'Healthcare': ['HIPAA Compliance', 'Healthcare Analytics', 'Clinical Workflows', 'Telemedicine'],
-      'Retail': ['Customer Journey Mapping', 'Omnichannel Strategy', 'Inventory Management', 'E-commerce'],
-      'Manufacturing': ['Lean Manufacturing', 'Supply Chain Optimization', 'IoT Implementation', 'Quality Management'],
-      'Energy': ['Renewable Energy', 'Grid Modernization', 'Energy Storage', 'Carbon Management'],
-      'Government': ['Policy Analysis', 'Public Sector Innovation', 'Citizen Experience', 'Digital Government']
-    };
-    
-    if (sectorSkills[project.sector]) {
-      projectSkills.push(...sectorSkills[project.sector]);
-    }
-  }
-  
-  // Add project-type specific skills based on project name
-  const projectName = project.name.toLowerCase();
-  if (projectName.includes('digital') || projectName.includes('transformation')) {
-    projectSkills.push('Digital Transformation', 'Change Management', 'Process Automation');
-  }
-  if (projectName.includes('data') || projectName.includes('analytics')) {
-    projectSkills.push('Data Analytics', 'Machine Learning', 'Data Visualization', 'SQL');
-  }
-  if (projectName.includes('strategy')) {
-    projectSkills.push('Strategic Planning', 'Market Research', 'Competitive Analysis');
-  }
-  if (projectName.includes('implementation') || projectName.includes('system')) {
-    projectSkills.push('System Integration', 'Project Management', 'User Training');
-  }
-  
-  // Filter out skills that allocated consultants already have
-  const existingSkills = allocatedConsultants.flatMap(c => 
-    c.expertise.split(',').map(skill => skill.trim())
-  );
-  
-  const suggestedSkills = projectSkills.filter(skill => 
-    !existingSkills.some(existing => 
-      existing.toLowerCase().includes(skill.toLowerCase()) || 
-      skill.toLowerCase().includes(existing.toLowerCase())
-    )
-  );
-  
-  // Remove duplicates and return top 5
-  return [...new Set(suggestedSkills)].slice(0, 5);
-};
-
 const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
   consultants,
   selectedProject,
   onSelectConsultant,
   onAllocateConsultant,
   selectedConsultantId,
-  allocatedConsultants = [],
 }) => {
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  
   // Filter for consultants on bench
   const availableConsultants = consultants.filter(c => c.status === 'Benched');
   
@@ -151,9 +88,6 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
   const consultantsForProject = selectedProject
     ? sortedConsultants.filter(isAvailableForProject)
     : sortedConsultants;
-
-  // Get suggested skills for the project
-  const suggestedSkills = selectedProject ? getSuggestedSkills(selectedProject, allocatedConsultants) : [];
   
   return (
     <div className="bg-white rounded-lg shadow">
@@ -166,32 +100,6 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
             }
           </h3>
           <div className="flex space-x-2">
-            {selectedProject && suggestedSkills.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex items-center space-x-1"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    <span>Skills to Develop</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
-                  {suggestedSkills.map((skill) => (
-                    <DropdownMenuItem 
-                      key={skill}
-                      onClick={() => setSelectedSkill(skill)}
-                      className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
-                    >
-                      <span className="text-sm">{skill}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
             <Button 
               variant="outline" 
               size="sm" 
@@ -213,26 +121,6 @@ const SuggestedConsultants: React.FC<SuggestedConsultantsProps> = ({
         {selectedProject && (
           <div className="mt-2 text-sm text-gray-500">
             Showing best matches for {selectedProject.name}
-            {selectedSkill && (
-              <span className="ml-2 text-blue-600">
-                • Focus: {selectedSkill}
-              </span>
-            )}
-          </div>
-        )}
-        {selectedProject && suggestedSkills.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs text-gray-600 mb-1">Recommended skills for allocated team to develop:</p>
-            <div className="flex flex-wrap gap-1">
-              {suggestedSkills.map((skill) => (
-                <span 
-                  key={skill} 
-                  className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full border border-blue-200"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
           </div>
         )}
       </div>

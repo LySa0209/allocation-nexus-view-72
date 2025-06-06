@@ -6,19 +6,16 @@ import { ProjectNeedsList } from '@/components/Allocation/ProjectNeedsList';
 import { ProjectDetailPanel } from '@/components/Allocation/ProjectDetailPanel';
 import { ConsultantsList } from '@/components/Allocation/ConsultantsList';
 import { AllocatedConsultants } from '@/components/Allocation/AllocatedConsultants';
-import SuggestedConsultants from '@/components/Allocation/SuggestedConsultants';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { consultants as mockConsultants, allocations as mockAllocations, projects as mockProjects, pipelineOpportunities as mockPipeline } from '../data/mockData';
 import { useDataSource } from '@/context/DataSourceContext';
 import { fetchConsultants, fetchProjects, setConsultantsToProject, fetchProjectConsultants } from '@/lib/api';
 import { Consultant, ProjectOrPipeline, Project, PipelineOpportunity, isProject } from '@/lib/types';
-
 const calculateChargeability = (consultants: Consultant[]): number => {
   if (consultants.length === 0) return 0;
   const allocatedCount = consultants.filter(c => c.status === "Allocated").length;
   return Math.round(allocatedCount / consultants.length * 100);
 };
-
 const Allocations: React.FC = () => {
   const {
     toast
@@ -50,7 +47,6 @@ const Allocations: React.FC = () => {
 
   // Confirm allocation loading state
   const [confirmLoading, setConfirmLoading] = useState(false);
-
   useEffect(() => {
     if (dataSource === 'mock') {
       // Use mock data
@@ -110,7 +106,6 @@ const Allocations: React.FC = () => {
     // Simulate partially allocated (would normally come from real allocation data)
     setPartiallyAllocated(Math.floor(fullyAllocatedConsultants.length * 0.25));
   }, [consultants, fullyAllocatedConsultants.length]);
-
   useEffect(() => {
     if (consultantsListRef.current && allocatedConsultantsRef.current) {
       const allocatedHeight = allocatedConsultantsRef.current.offsetHeight;
@@ -225,7 +220,6 @@ const Allocations: React.FC = () => {
       setConfirmLoading(false);
     }
   };
-
   return <div className="min-h-screen bg-gray-50">
       <Navbar />
       
@@ -251,14 +245,7 @@ const Allocations: React.FC = () => {
             <AllocationKPI totalConsultants={consultants.length} availableConsultants={benchedConsultants.length} fullyAllocated={fullyAllocatedConsultants.length - partiallyAllocated} partiallyAllocated={partiallyAllocated} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div ref={consultantsListRef}>
-                <SuggestedConsultants
-                  consultants={consultants}
-                  selectedProject={selectedProject}
-                  onSelectConsultant={() => {}}
-                  onAllocateConsultant={handleAllocateConsultant}
-                  selectedConsultantId={null}
-                  allocatedConsultants={allocatedConsultants}
-                />
+                <ConsultantsList consultants={consultants} onAllocateConsultant={handleAllocateConsultant} selectedConsultants={selectedConsultantIds} selectedProjectId={selectedProject?.id || null} />
               </div>
               
               <div ref={allocatedConsultantsRef}>
@@ -270,5 +257,4 @@ const Allocations: React.FC = () => {
       </main>
     </div>;
 };
-
 export default Allocations;
